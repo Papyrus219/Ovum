@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.17)
 project(ovum)
 
-option(ERUPTOR_LOCAL_DEV "Use local code to faster test while development." ON)
+option(ERUPTOR_LOCAL_DEV "Use local code to faster test while development." OFF)
 set(ERUPTOR_LOCAL_DEV_PATH "" CACHE PATH "Path to local code of eruptor engine. Use while engine development and testing.")
 
 include(FetchContent)

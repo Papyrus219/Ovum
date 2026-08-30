@@ -100,7 +100,10 @@ void ovum::App::Render()
 {
     renderer->Stage_scene_render_data( main_scene );
 
-    renderer->Stage_text_render_data( std::format("Mode: {}", current_state->Get_state_name()), 10, 40, main_font, {155, 20, 30, 255});
+    if(is_ui_rendered)
+    {
+        renderer->Stage_text_render_data( std::format("Mode: {}", current_state->Get_state_name()), 10, 40, main_font, {155, 10, 10, 255});
+    }
 
     current_state->Render();
     renderer->Flush_render_buffor();
@@ -115,6 +118,13 @@ void ovum::App::On_event(const eruptor::event::Event & event)
     else if(auto mouse_move = event.Get_if<eruptor::event::Event::Mouse_moved>())
     {
         camera->Process_mouse_movement(mouse_move->x_offset, mouse_move->y_offset);
+    }
+    else if(auto key_pressed = event.Get_if<eruptor::event::Event::Key_pressed>())
+    {
+        if(key_pressed->key_type == eruptor::event::Key::F2)
+        {
+            is_ui_rendered = !is_ui_rendered;
+        }
     }
 
     current_state->React_to_event( event );

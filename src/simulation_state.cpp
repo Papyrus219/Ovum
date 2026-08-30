@@ -73,7 +73,10 @@ void ovum::Simulation_state::Update()
 
 void ovum::Simulation_state::Render()
 {
-
+    if(app->is_ui_rendered)
+    {
+        app->renderer->Stage_text_render_data( std::format("Simulation speed: {}", simulation_speed), 10, 80, app->main_font, {55, 20, 130, 255});
+    }
 }
 
 void ovum::Simulation_state::New_day()
@@ -382,6 +385,21 @@ void ovum::Simulation_state::React_to_event(const eruptor::event::Event & event)
             entity.value().get().Eat();
 
             main_scene->Remove_food( colision->object_b_id );
+        }
+    }
+    else if(auto mouse_scroll = event.Get_if<eruptor::event::Event::Mouse_scroll>())
+    {
+        simulation_speed += mouse_scroll->y_offset;
+        simulation_speed = std::ceil( simulation_speed );
+
+        if(simulation_speed < 1)
+        {
+            simulation_speed = 1;
+        }
+
+        if(simulation_speed > 100)
+        {
+            simulation_speed = 100;
         }
     }
     else if(auto key_pressed = event.Get_if<eruptor::event::Event::Key_pressed>())

@@ -32,6 +32,7 @@ private:
     eruptor::resource::Font_handle small_font{};
 
     float time_elapsed{};
+    bool is_ui_rendered{true};
 
     std::chrono::high_resolution_clock app_clock{};
     std::chrono::high_resolution_clock::time_point last_time{};

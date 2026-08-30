@@ -137,11 +137,14 @@ void ovum::Editor_state::Update()
 
 void ovum::Editor_state::Render()
 {
-    app->renderer->Stage_text_render_data( std::format("Selected object type: {}", Get_string_from_object_type_enum( object_type )), 10, 80, app->main_font, {20, 40, 155, 255});
+    if(app->is_ui_rendered)
+    {
+        app->renderer->Stage_text_render_data( std::format("Selected object type: {}", Get_string_from_object_type_enum( object_type )), 10, 80, app->main_font, {20, 40, 155, 255});
 
-    app->renderer->Stage_text_render_data("M - Change mode", 890, 820, app->small_font, {255, 255, 255, 255});
-    app->renderer->Stage_text_render_data("T - Change object type", 882, 850, app->small_font, {255, 255, 255, 255});
-    app->renderer->Stage_text_render_data("N - Add new object", 882, 880, app->small_font, {255, 255, 255, 255});
+        app->renderer->Stage_text_render_data("M - Change mode", 890, 820, app->small_font, {255, 255, 255, 255});
+        app->renderer->Stage_text_render_data("T - Change object type", 882, 850, app->small_font, {255, 255, 255, 255});
+        app->renderer->Stage_text_render_data("N - Add new object", 882, 880, app->small_font, {255, 255, 255, 255});
+    }
 }
 
 void ovum::Editor_state::Reload_scene()
