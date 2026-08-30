@@ -1,7 +1,23 @@
 cmake_minimum_required(VERSION 3.17)
 project(ovum)
 
-add_subdirectory(engine/)
+option(ERUPTOR_LOCAL_DEV "Use local code to faster test while development." ON)
+set(ERUPTOR_LOCAL_DEV_PATH "" CACHE PATH "Path to local code of eruptor engine. Use while engine development and testing.")
+
+include(FetchContent)
+
+if(ERUPTOR_LOCAL_DEV)
+    FetchContent_Declare(
+        engine
+        SOURCE_DIR ${ERUPTOR_LOCAL_DEV_PATH})
+else()
+    FetchContent_Declare(
+        engine
+        GIT_REPOSITORY git@github.com:Papyrus219/Eruptor-engine.git
+        GIT_TAG main)
+endif()
+
+FetchContent_MakeAvailable(engine)
 
 set(APP_SRC ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
             ${CMAKE_CURRENT_LIST_DIR}/src/app.cpp
