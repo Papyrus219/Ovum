@@ -33,7 +33,7 @@ void ovum::Simulation_state::Init(App & app)
     gp_comm.Enable_2d_bars("Speed");
     gp_comm.Set_x_axis_title("Speed");
     gp_comm.Set_y_axis_title("Entities count");
-    gp_comm.Set_x_axis_range(0.0, 10.0);
+    gp_comm.Set_x_axis_range(0.0, 50.0);
     gp_comm.Set_y_axis_range(0, 10);
 }
 
