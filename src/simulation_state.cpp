@@ -33,7 +33,7 @@ void ovum::Simulation_state::Init(App & app)
     gp_comm.Enable_2d_bars("Speed");
     gp_comm.Set_x_axis_title("Speed");
     gp_comm.Set_y_axis_title("Entities count");
-    gp_comm.Set_x_axis_range(0.0, 30.0);
+    gp_comm.Set_x_axis_range(0.0, 10.0);
     gp_comm.Set_y_axis_range(0, 15);
 }
 
@@ -50,9 +50,14 @@ void ovum::Simulation_state::Enter_state()
 
 void ovum::Simulation_state::Update()
 {
-    std::chrono::duration<float> delta_time = app->app_clock.now() - last_time;
+    std::chrono::duration<float> delta_time = (app->app_clock.now() - last_time);
+    double delta_time_val = delta_time.count();
 
-    Update_ai(delta_time.count());
+    delta_time_val = std::min(delta_time_val, 0.02);
+
+    std::println(std::clog, "Delta time: {}", delta_time_val);
+
+    Update_ai(delta_time_val);
     gp_comm.Begin_frame();
 
     std::unordered_map<float, uint32_t> entieties_speed{};
@@ -140,6 +145,12 @@ void ovum::Simulation_state::Update_ai(float delta_time)
                 break;
         }
     }
+
+    if(day_should_end)
+    {
+        New_day();
+        day_should_end = false;
+    }
 }
 
 void ovum::Simulation_state::Update_hunting(eruptor::scene::Render_object & render_object, Entiety_data & entity_data, float delta_time)
@@ -181,7 +192,7 @@ void ovum::Simulation_state::Update_hunting(eruptor::scene::Render_object & rend
     {
         entity_data.ai_data.time_elapsed += delta_time;
 
-        if(entity_data.ai_data.time_elapsed >= 0.5)
+        if(entity_data.ai_data.time_elapsed >= 0.05)
         {
             if(decision_distributor(generator) == 1)
             {
@@ -229,7 +240,7 @@ void ovum::Simulation_state::Update_hunting(eruptor::scene::Render_object & rend
         finished_entities++;
         if(finished_entities >= main_scene->entieties.size())
         {
-            New_day();
+            day_should_end = true;
         }
     }
 

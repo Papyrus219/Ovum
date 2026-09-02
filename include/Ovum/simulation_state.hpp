@@ -37,7 +37,7 @@ private:
 
     std::random_device random_device{};
     std::mt19937 generator{ random_device() };
-    std::uniform_int_distribution<uint8_t> decision_distributor{0, 3};
+    std::uniform_int_distribution<uint8_t> decision_distributor{0, 1};
     std::uniform_real_distribution<float> evolution_distributor{-0.5, 0.5};
     std::uniform_real_distribution<float> rotation_distributor{-glm::half_pi<float>(), glm::half_pi<float>()};
     std::uniform_real_distribution<float> x_pos_distribution{};
@@ -47,6 +47,7 @@ private:
     std::chrono::high_resolution_clock::time_point last_time{};
 
     float simulation_speed{15};
+    bool day_should_end{};
 
     size_t finished_entities{};
     float wall_margin{3.0f};
