@@ -19,12 +19,13 @@ void ovum::App::Init()
     resources = &engine.Get_resource_manager();
     physic_manager = &engine.Get_physic_manager();
 
+    resources->texture_dirr_path = "../../textures/";
+
     window = &renderer->Get_window();
     camera = &renderer->Get_camera();
 
     main_font = resources->Add_font_atlas("../../fonts/arial.ttf", 30);
     small_font = resources->Add_font_atlas("../../fonts/arial.ttf", 5);
-    resources->Load_font_atlases();
 
     for(auto & entity : main_scene.entieties)
     {
@@ -34,6 +35,8 @@ void ovum::App::Init()
 
     editor_state.Init( *this );
     simulation_state.Init( *this );
+
+    resources->Load_resources();
 
     auto floor_it = main_scene.objects_aliases.find("floor");
 
