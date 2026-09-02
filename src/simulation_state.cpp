@@ -33,7 +33,7 @@ void ovum::Simulation_state::Init(App & app)
     gp_comm.Enable_2d_bars("Speed");
     gp_comm.Set_x_axis_title("Speed");
     gp_comm.Set_y_axis_title("Entities count");
-    gp_comm.Set_x_axis_range(0.0, 50.0);
+    gp_comm.Set_x_axis_range(0.0, 10.0);
     gp_comm.Set_y_axis_range(0, 10);
 }
 
@@ -69,7 +69,7 @@ void ovum::Simulation_state::Update()
 
     gp_comm.Begin_frame();
 
-    std::unordered_map<float, uint32_t> entieties_speed{};
+    entieties_speed.clear();
 
     for(auto & entity : main_scene->entieties)
     {

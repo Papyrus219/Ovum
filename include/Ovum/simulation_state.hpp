@@ -48,6 +48,8 @@ private:
     GP_communicator gp_comm{};
     std::chrono::high_resolution_clock::time_point last_time{};
 
+    std::unordered_map<float, uint32_t> entieties_speed{};
+
     float simulation_speed{15};
     bool day_should_end{};
 
