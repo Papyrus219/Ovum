@@ -33,8 +33,8 @@ void ovum::Simulation_state::Init(App & app)
     gp_comm.Enable_2d_bars("Speed");
     gp_comm.Set_x_axis_title("Speed");
     gp_comm.Set_y_axis_title("Entities count");
-    gp_comm.Set_x_axis_range(0.0, 10.0);
-    gp_comm.Set_y_axis_range(0, 15);
+    gp_comm.Set_x_axis_range(0.0, 50.0);
+    gp_comm.Set_y_axis_range(0, 10);
 }
 
 void ovum::Simulation_state::Enter_state()
@@ -50,14 +50,23 @@ void ovum::Simulation_state::Enter_state()
 
 void ovum::Simulation_state::Update()
 {
-    std::chrono::duration<float> delta_time = (app->app_clock.now() - last_time);
-    double delta_time_val = delta_time.count();
+    constexpr float fixed_delta_time = 1.0f / 120.0f;
+    constexpr float max_frame_durration = 0.025;
 
-    delta_time_val = std::min(delta_time_val, 0.02);
+    std::chrono::duration<float> delta_time_raw = (app->app_clock.now() - last_time);
+    float frame_durration = std::min(delta_time_raw.count(), max_frame_durration);
 
-    std::println(std::clog, "Delta time: {}", delta_time_val);
+    time_acumulator += frame_durration;
 
-    Update_ai(delta_time_val);
+    while(time_acumulator >= fixed_delta_time)
+    {
+        Update_ai( fixed_delta_time );
+
+        app->physic_manager->Chceck_colisions( *main_scene, fixed_delta_time );
+
+        time_acumulator -= fixed_delta_time;
+    }
+
     gp_comm.Begin_frame();
 
     std::unordered_map<float, uint32_t> entieties_speed{};
@@ -348,7 +357,7 @@ void ovum::Simulation_state::Update_return(eruptor::scene::Render_object& render
         finished_entities++;
         if(finished_entities >= main_scene->entieties.size())
         {
-            New_day();
+            day_should_end = true;
         }
     }
     else if(entity_data.energy <= 0)
@@ -359,7 +368,7 @@ void ovum::Simulation_state::Update_return(eruptor::scene::Render_object& render
         finished_entities++;
         if(finished_entities >= main_scene->entieties.size())
         {
-            New_day();
+            day_should_end = true;
         }
     }
 }

@@ -43,6 +43,8 @@ private:
     std::uniform_real_distribution<float> x_pos_distribution{};
     std::uniform_real_distribution<float> z_pos_distribution{};
 
+    float time_acumulator{};
+
     GP_communicator gp_comm{};
     std::chrono::high_resolution_clock::time_point last_time{};
 

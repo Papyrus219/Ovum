@@ -72,7 +72,6 @@ void ovum::App::Start_loop()
 void ovum::App::Update()
 {
     window->Update();
-    physic_manager->Chceck_colisions( main_scene );
 
     std::chrono::duration<float> delta_time = app_clock.now() - last_time;
 
