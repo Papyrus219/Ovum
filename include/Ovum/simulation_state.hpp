@@ -3,6 +3,7 @@
 
 #include <Ovum/app_state.hpp>
 #include <Ovum/simulation_scene.hpp>
+#include <Ovum/behaviors/speed_evo_behavior_manager.hpp>
 #include <Ovum/gp_communicator.hpp>
 #include <random>
 
@@ -20,16 +21,6 @@ public:
     virtual void React_to_event(const eruptor::event::Event & event) override;
 
     virtual std::string_view Get_state_name() override {return "Simulation";}
-
-private:
-    void New_day();
-
-    void Update_ai(float delta_time);
-
-    void Update_hunting(eruptor::scene::Render_object & render_object, Entiety_data & entity_data, float delta_time);
-    void Update_return(eruptor::scene::Render_object & render_object, Entiety_data & entity_data, float delta_time);
-
-    void Spawn_food(uint32_t food_amount);
 
     float Normilize_angle(float angle);
 
@@ -51,10 +42,11 @@ private:
     std::unordered_map<float, uint32_t> entieties_speed{};
 
     float simulation_speed{15};
-    bool day_should_end{};
 
-    size_t finished_entities{};
     float wall_margin{3.0f};
+
+    Speed_evo_behavior_manager speed_evo_behavior{};
+    Entity_behavior_manager * behavior_manager{};
 };
 
 }

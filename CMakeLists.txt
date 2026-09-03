@@ -28,6 +28,9 @@ set(APP_SRC ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
             ${CMAKE_CURRENT_LIST_DIR}/src/app_state.cpp
             ${CMAKE_CURRENT_LIST_DIR}/src/editor_state.cpp
             ${CMAKE_CURRENT_LIST_DIR}/src/simulation_state.cpp
+
+            ${CMAKE_CURRENT_LIST_DIR}/src/behaviors/entity_behavior_manager.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/behaviors/speed_evo_behavior_manager.cpp
 )
 
 add_executable(app ${APP_SRC})

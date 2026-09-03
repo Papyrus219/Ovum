@@ -20,7 +20,6 @@ public:
 
     virtual void On_event(const eruptor::event::Event & event) override;
 
-private:
     void Update();
     void Render();
 
@@ -53,8 +52,7 @@ private:
     Editor_state editor_state{};
     Simulation_state simulation_state{};
 
-    friend class Editor_state;
-    friend class Simulation_state;
+    friend class App_state;
 };
 
 }

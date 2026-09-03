@@ -3,6 +3,9 @@
 
 #include <Eruptor/event/event.hpp>
 #include <string_view>
+#include <Eruptor/eruptor.hpp>
+#include <Ovum/simulation_scene.hpp>
+#include <Ovum/gp_communicator.hpp>
 
 namespace ovum
 {
@@ -22,8 +25,7 @@ public:
     void Assign_app(App & app) {this->app = &app;}
     virtual std::string_view Get_state_name() = 0;
 
-protected:
-    App * app{};
+    ovum::App * app{};
 };
 
 }
