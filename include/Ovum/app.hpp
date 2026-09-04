@@ -52,6 +52,12 @@ public:
     Editor_state editor_state{};
     Simulation_state simulation_state{};
 
+    eruptor::scene::Scene_parser scene_parser{};
+    ovum::Simulation_parser simulation_parser{};
+
+    std::filesystem::path current_scene_path{Editor_state::scene_path_1};
+    std::filesystem::path current_simulation_info_path{Editor_state::simulation_path_1};
+
     friend class App_state;
 };
 

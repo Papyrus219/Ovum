@@ -4,6 +4,7 @@
 #include <Ovum/app_state.hpp>
 #include <Ovum/simulation_scene.hpp>
 #include <Ovum/behaviors/speed_evo_behavior_manager.hpp>
+#include <Ovum/behaviors/survive_behavior_manager.hpp>
 #include <Ovum/gp_communicator.hpp>
 #include <random>
 
@@ -22,7 +23,10 @@ public:
 
     virtual std::string_view Get_state_name() override {return "Simulation";}
 
+    void Set_entity_behavior(Entity_behavior_manager & entity_behavior);
+
     float Normilize_angle(float angle);
+    void Reload_scene();
 
     ovum::Simulation_scene * main_scene{};
 
@@ -39,13 +43,12 @@ public:
     GP_communicator gp_comm{};
     std::chrono::high_resolution_clock::time_point last_time{};
 
-    std::unordered_map<float, uint32_t> entieties_speed{};
-
     float simulation_speed{15};
 
     float wall_margin{3.0f};
 
     Speed_evo_behavior_manager speed_evo_behavior{};
+    Survive_behavior_manager survive_behavior;
     Entity_behavior_manager * behavior_manager{};
 };
 

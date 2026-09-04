@@ -23,7 +23,6 @@ public:
 
     virtual std::string_view Get_state_name() override {return "Editor";}
 
-private:
     ovum::Simulation_scene * main_scene{};
 
     enum class Object_type
@@ -48,16 +47,10 @@ private:
     float food_scroll_offset{};
     float light_source_scroll_offset{};
 
-    eruptor::scene::Scene_parser scene_parser{};
-    ovum::Simulation_parser simulation_parser{};
-
     eruptor::scene::Scene_saver scene_saver{};
     ovum::Simulation_saver simulation_saver{};
 
     std::chrono::high_resolution_clock::time_point last_time{};
-
-    std::filesystem::path current_scene_path{scene_path_1};
-    std::filesystem::path current_simulation_info_path{simulation_path_1};
 
     static const std::filesystem::path scene_path_1;
     static const std::filesystem::path scene_path_2;

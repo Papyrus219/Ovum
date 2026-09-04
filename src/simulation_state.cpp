@@ -30,11 +30,9 @@ void ovum::Simulation_state::Init(App & app)
 
     this->main_scene = &app.main_scene;
 
-    gp_comm.Enable_2d_bars("Speed");
-    gp_comm.Set_x_axis_title("Speed");
-    gp_comm.Set_y_axis_title("Entities count");
-    gp_comm.Set_x_axis_range(0.0, 50.0);
-    gp_comm.Set_y_axis_range(0, 10);
+    speed_evo_behavior.Init( *this );
+    survive_behavior.Init( *this );
+    Set_entity_behavior(speed_evo_behavior);
 }
 
 void ovum::Simulation_state::Enter_state()
@@ -60,29 +58,14 @@ void ovum::Simulation_state::Update()
 
     while(time_acumulator >= fixed_delta_time)
     {
-        Update_ai( fixed_delta_time );
+        behavior_manager->Update_ai( fixed_delta_time );
 
         app->physic_manager->Chceck_colisions( *main_scene, fixed_delta_time );
 
         time_acumulator -= fixed_delta_time;
     }
 
-    gp_comm.Begin_frame();
-
-    entieties_speed.clear();
-
-    for(auto & entity : main_scene->entieties)
-    {
-        float bucket = std::round(entity.speed * 10.0f) / 10.0f;
-        entieties_speed[bucket]++;
-    }
-
-    for(auto [speed, amount] : entieties_speed)
-    {
-        gp_comm.Stage_data({speed, amount});
-    }
-
-    gp_comm.End_frame();
+    behavior_manager->Update_graph();
 
     last_time = app->app_clock.now();
 }
@@ -95,45 +78,11 @@ void ovum::Simulation_state::Render()
     }
 }
 
-void ovum::Simulation_state::New_day()
+void ovum::Simulation_state::Set_entity_behavior(Entity_behavior_manager & entity_behavior)
 {
-    finished_entities = 0;
-
-    while(!main_scene->food.empty())
-    {
-        main_scene->Remove_food( main_scene->food.back().render_object_id );
-    }
-
-    Spawn_food(40);
-
-    auto & entieties = main_scene->entieties;
-    auto & render_objects = main_scene->render_objects;
-    for(auto i{0UZ}; i < entieties.size(); i++)
-    {
-        if(entieties[i].ai_data.state == Ai_state::DEAD)
-        {
-            main_scene->Remove_entity( entieties[i].render_object_id );
-            i--;
-        }
-        else if(entieties[i].ai_data.state == Ai_state::RESTING)
-        {
-            entieties[i].energy = 30;
-            entieties[i].ai_data.state = Ai_state::HUNTING;
-            entieties[i].ai_data.time_elapsed = 0;
-
-            if(entieties[i].food_eaten >= 2)
-            {
-                auto new_id = main_scene->Add_entity();
-                entieties[new_id].speed = entieties[i].speed;
-                entieties[new_id].speed += evolution_distributor(generator);
-                entieties[new_id].ai_data = entieties[i].ai_data;
-                entieties[new_id].ai_data.state = Ai_state::HUNTING;
-
-                render_objects[ entieties[new_id].render_object_id ] = render_objects[ entieties[i].render_object_id ];
-            }
-            entieties[i].food_eaten = 0;
-        }
-    }
+    Reload_scene();
+    this->behavior_manager = &entity_behavior;
+    this->behavior_manager->Setup();
 }
 
 float ovum::Simulation_state::Normilize_angle(float angle)
@@ -141,24 +90,37 @@ float ovum::Simulation_state::Normilize_angle(float angle)
     return std::atan2(std::sin(angle), std::cos(angle));
 }
 
+void ovum::Simulation_state::Reload_scene()
+{
+    auto parsed_scene = app->scene_parser.Load_scene(app->current_scene_path);
+    if(parsed_scene)
+    {
+        *main_scene = *parsed_scene;
+        main_scene->Init( *app->resources );
+    }
+    else
+    {
+        std::print(std::cerr, "Error: {}\n", parsed_scene.error());
+    }
+
+    auto parsed_simulation_scene = app->simulation_parser.Load_simulation_data_into_scene(app->current_simulation_info_path, *main_scene);
+    if(parsed_simulation_scene.has_value())
+    {
+        *main_scene = parsed_simulation_scene.value();
+        main_scene->Init( *app->resources );
+    }
+    else
+    {
+        std::println(std::cerr, "Error: {}", parsed_simulation_scene.error());
+        std::exit(EXIT_FAILURE);
+    }
+}
+
 void ovum::Simulation_state::React_to_event(const eruptor::event::Event & event)
 {
-    if(auto colision = event.Get_if<eruptor::event::Event::Collision_occurred>())
-    {
-        if(auto entity = main_scene->Get_if_is_entiety( colision->object_b_id ); main_scene->Get_if_is_food( colision->object_a_id ) && entity)
-        {
-            entity.value().get().Eat();
+    behavior_manager->React_to_event(event);
 
-            main_scene->Remove_food( colision->object_a_id );
-        }
-        else if(auto entity = main_scene->Get_if_is_entiety( colision->object_a_id ); entity && main_scene->Get_if_is_food( colision->object_b_id ) )
-        {
-            entity.value().get().Eat();
-
-            main_scene->Remove_food( colision->object_b_id );
-        }
-    }
-    else if(auto mouse_scroll = event.Get_if<eruptor::event::Event::Mouse_scroll>())
+    if(auto mouse_scroll = event.Get_if<eruptor::event::Event::Mouse_scroll>())
     {
         simulation_speed += mouse_scroll->y_offset;
         simulation_speed = std::ceil( simulation_speed );
@@ -182,7 +144,7 @@ void ovum::Simulation_state::React_to_event(const eruptor::event::Event & event)
                 app->current_state->Enter_state();
                 break;
             case eruptor::event::Key::SPACE:
-                New_day();
+                behavior_manager->New_day();
                 break;
             default:
                 break;

@@ -1,4 +1,4 @@
-#include <Ovum/behaviors/speed_evo_behavior_manager.hpp>
+#include <Ovum/behaviors/size_speed_evo_behavior_manager.hpp>
 #include <Ovum/simulation_state.hpp>
 #include <Ovum/simulation_scene.hpp>
 #include <Ovum/app.hpp>
@@ -6,16 +6,17 @@
 
 using namespace ovum;
 
-void ovum::Speed_evo_behavior_manager::Setup()
+void ovum::Size_speed_evo_behavior_manager::Setup()
 {
-    gp_comm->Enable_2d_bars("Speed");
+    gp_comm->Enable_3d_points("Stats");
     gp_comm->Set_x_axis_title("Speed");
     gp_comm->Set_y_axis_title("Entities count");
+    gp_comm->Set_z_axis_title("Size");
     gp_comm->Set_x_axis_range(0.0, 30.0);
     gp_comm->Set_y_axis_range(0, 10);
 }
 
-void ovum::Speed_evo_behavior_manager::Update_ai(float delta_time)
+void ovum::Size_speed_evo_behavior_manager::Update_ai(float delta_time)
 {
     for(auto & entity : main_scene->entieties)
     {
@@ -42,7 +43,7 @@ void ovum::Speed_evo_behavior_manager::Update_ai(float delta_time)
     }
 }
 
-void ovum::Speed_evo_behavior_manager::New_day()
+void ovum::Size_speed_evo_behavior_manager::New_day()
 {
     finished_entities = 0;
 
@@ -85,7 +86,7 @@ void ovum::Speed_evo_behavior_manager::New_day()
     }
 }
 
-void ovum::Speed_evo_behavior_manager::Update_hunting(eruptor::scene::Render_object & render_object, Entiety_data & entity_data, float delta_time)
+void ovum::Size_speed_evo_behavior_manager::Update_hunting(eruptor::scene::Render_object & render_object, Entiety_data & entity_data, float delta_time)
 {
     glm::vec3 pos = render_object.Get_position();
 
@@ -203,7 +204,7 @@ void ovum::Speed_evo_behavior_manager::Update_hunting(eruptor::scene::Render_obj
     }
 }
 
-void ovum::Speed_evo_behavior_manager::Update_return(eruptor::scene::Render_object& render_object, Entiety_data& entity_data, float delta_time)
+void ovum::Size_speed_evo_behavior_manager::Update_return(eruptor::scene::Render_object& render_object, Entiety_data& entity_data, float delta_time)
 {
     glm::vec3 pos = render_object.Get_position();
 
@@ -298,7 +299,7 @@ void ovum::Speed_evo_behavior_manager::Update_return(eruptor::scene::Render_obje
     }
 }
 
-void ovum::Speed_evo_behavior_manager::Update_graph()
+void ovum::Size_speed_evo_behavior_manager::Update_graph()
 {
     gp_comm->Begin_frame();
 
@@ -318,7 +319,7 @@ void ovum::Speed_evo_behavior_manager::Update_graph()
     gp_comm->End_frame();
 }
 
-void ovum::Speed_evo_behavior_manager::React_to_event(const eruptor::event::Event & event)
+void ovum::Size_speed_evo_behavior_manager::React_to_event(const eruptor::event::Event & event)
 {
     if(auto colision = event.Get_if<eruptor::event::Event::Collision_occurred>())
     {

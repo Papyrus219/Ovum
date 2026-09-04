@@ -30,7 +30,7 @@ void ovum::Editor_state::Init(App & app)
 {
     Assign_app(app);
 
-    scene_parser.Assign_resource_manager(*app.resources);
+    app.scene_parser.Assign_resource_manager(*app.resources);
     scene_saver.Assign_resource_manager(*app.resources);
 
     this->main_scene = &app.main_scene;
@@ -149,7 +149,7 @@ void ovum::Editor_state::Render()
 
 void ovum::Editor_state::Reload_scene()
 {
-    auto parsed_scene = scene_parser.Load_scene(current_scene_path);
+    auto parsed_scene = app->scene_parser.Load_scene(app->current_scene_path);
     if(parsed_scene)
     {
         *main_scene = *parsed_scene;
@@ -160,7 +160,7 @@ void ovum::Editor_state::Reload_scene()
         std::print(std::cerr, "Error: {}\n", parsed_scene.error());
     }
 
-    auto parsed_simulation_scene = simulation_parser.Load_simulation_data_into_scene(current_simulation_info_path, *main_scene);
+    auto parsed_simulation_scene = app->simulation_parser.Load_simulation_data_into_scene(app->current_simulation_info_path, *main_scene);
     if(parsed_simulation_scene.has_value())
     {
         *main_scene = parsed_simulation_scene.value();
@@ -175,14 +175,14 @@ void ovum::Editor_state::Reload_scene()
 
 void ovum::Editor_state::Save_scene()
 {
-    auto result = scene_saver.Save_scene_data(*main_scene, current_scene_path);
+    auto result = scene_saver.Save_scene_data(*main_scene, app->current_scene_path);
     if(!result.has_value())
     {
         std::println(std::cerr, "Error: {}", result.error());
         std::exit(EXIT_FAILURE);
     }
 
-    result = simulation_saver.Save_simulation_data(*main_scene, current_simulation_info_path);
+    result = simulation_saver.Save_simulation_data(*main_scene, app->current_simulation_info_path);
     if(!result.has_value())
     {
         std::println(std::cerr, "Error: {}", result.error());
@@ -382,102 +382,102 @@ void ovum::Editor_state::Handle_file_key_input(eruptor::event::Key key)
         case eruptor::event::Key::KEY_1:
             if(app->window->Is_key_pressed( eruptor::event::Key::LEFT_SHIFT ))
             {
-                current_simulation_info_path = simulation_path_1;
+                app->current_simulation_info_path = simulation_path_1;
             }
             else
             {
-                current_scene_path = scene_path_1;
+                app->current_scene_path = scene_path_1;
             }
-            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", current_scene_path.c_str(), current_simulation_info_path.c_str());
+            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.c_str(), app->current_simulation_info_path.c_str());
             break;
         case eruptor::event::Key::KEY_2:
             if(app->window->Is_key_pressed( eruptor::event::Key::LEFT_SHIFT ))
             {
-                current_simulation_info_path = simulation_path_2;
+                app->current_simulation_info_path = simulation_path_2;
             }
             else
             {
-                current_scene_path = scene_path_2;
+                app->current_scene_path = scene_path_2;
             }
-            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", current_scene_path.c_str(), current_simulation_info_path.c_str());
+            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.c_str(), app->current_simulation_info_path.c_str());
             break;
         case eruptor::event::Key::KEY_3:
             if(app->window->Is_key_pressed( eruptor::event::Key::LEFT_SHIFT ))
             {
 
-                current_simulation_info_path = simulation_path_3;
+                app->current_simulation_info_path = simulation_path_3;
             }
             else
             {
-                current_scene_path = scene_path_3;
+                app->current_scene_path = scene_path_3;
             }
-            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", current_scene_path.c_str(), current_simulation_info_path.c_str());
+            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.c_str(), app->current_simulation_info_path.c_str());
             break;
         case eruptor::event::Key::KEY_4:
             if(app->window->Is_key_pressed( eruptor::event::Key::LEFT_SHIFT ))
             {
-                current_simulation_info_path = simulation_path_4;
+                app->current_simulation_info_path = simulation_path_4;
             }
             else
             {
-                current_scene_path = scene_path_4;
+                app->current_scene_path = scene_path_4;
             }
-            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", current_scene_path.c_str(), current_simulation_info_path.c_str());
+            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.c_str(), app->current_simulation_info_path.c_str());
             break;
         case eruptor::event::Key::KEY_5:
             if(app->window->Is_key_pressed( eruptor::event::Key::LEFT_SHIFT ))
             {
-                current_simulation_info_path = simulation_path_5;
+                app->current_simulation_info_path = simulation_path_5;
             }
             else
             {
-                current_scene_path = scene_path_5;
+                app->current_scene_path = scene_path_5;
             }
-            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", current_scene_path.c_str(), current_simulation_info_path.c_str());
+            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.c_str(), app->current_simulation_info_path.c_str());
             break;
         case eruptor::event::Key::KEY_6:
             if(app->window->Is_key_pressed( eruptor::event::Key::LEFT_SHIFT ))
             {
-                current_simulation_info_path = simulation_path_6;
+                app->current_simulation_info_path = simulation_path_6;
             }
             else
             {
-                current_scene_path = scene_path_6;
+                app->current_scene_path = scene_path_6;
             }
-            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", current_scene_path.c_str(), current_simulation_info_path.c_str());
+            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.c_str(), app->current_simulation_info_path.c_str());
             break;
         case eruptor::event::Key::KEY_7:
             if(app->window->Is_key_pressed( eruptor::event::Key::LEFT_SHIFT ))
             {
-                current_simulation_info_path = simulation_path_7;
+                app->current_simulation_info_path = simulation_path_7;
             }
             else
             {
-                current_scene_path = scene_path_7;
+                app->current_scene_path = scene_path_7;
             }
-            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", current_scene_path.c_str(), current_simulation_info_path.c_str());
+            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.c_str(), app->current_simulation_info_path.c_str());
             break;
         case eruptor::event::Key::KEY_8:
             if(app->window->Is_key_pressed( eruptor::event::Key::LEFT_SHIFT ))
             {
-                current_simulation_info_path = simulation_path_8;
+                app->current_simulation_info_path = simulation_path_8;
             }
             else
             {
-                current_scene_path = scene_path_8;
+                app->current_scene_path = scene_path_8;
             }
-            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", current_scene_path.c_str(), current_simulation_info_path.c_str());
+            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.c_str(), app->current_simulation_info_path.c_str());
             break;
         case eruptor::event::Key::KEY_9:
             if(app->window->Is_key_pressed( eruptor::event::Key::LEFT_SHIFT ))
             {
-                current_simulation_info_path = simulation_path_9;
+                app->current_simulation_info_path = simulation_path_9;
             }
             else
             {
-                current_scene_path = scene_path_9;
+                app->current_scene_path = scene_path_9;
             }
-            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", current_scene_path.c_str(), current_simulation_info_path.c_str());
+            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.c_str(), app->current_simulation_info_path.c_str());
             break;
         default:
             break;

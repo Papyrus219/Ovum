@@ -1,48 +1,22 @@
-#include <Ovum/behaviors/speed_evo_behavior_manager.hpp>
-#include <Ovum/simulation_state.hpp>
+#include <Ovum/behaviors/survive_behavior_manager.hpp>
+#include <Ovum/simulation_scene.hpp>
+#include <Ovum/gp_communicator.hpp>
 #include <Ovum/simulation_scene.hpp>
 #include <Ovum/app.hpp>
-#include <Ovum/gp_communicator.hpp>
 
 using namespace ovum;
 
-void ovum::Speed_evo_behavior_manager::Setup()
+void Survive_behavior_manager::Setup()
 {
-    gp_comm->Enable_2d_bars("Speed");
-    gp_comm->Set_x_axis_title("Speed");
-    gp_comm->Set_y_axis_title("Entities count");
-    gp_comm->Set_x_axis_range(0.0, 30.0);
-    gp_comm->Set_y_axis_range(0, 10);
+    gp_comm->Enable_2d_bars("NO DATA");
 }
 
-void ovum::Speed_evo_behavior_manager::Update_ai(float delta_time)
+void Survive_behavior_manager::Update_graph()
 {
-    for(auto & entity : main_scene->entieties)
-    {
-        auto & render_object = main_scene->render_objects[ entity.render_object_id ];
 
-        switch(entity.ai_data.state)
-        {
-            ///@todo FIX DELTA TIME
-            case Ai_state::HUNTING:
-                Update_hunting(render_object, entity, delta_time * sim_state->simulation_speed);
-                break;
-            case Ai_state::RETURN:
-                Update_return(render_object, entity, delta_time * sim_state->simulation_speed);
-                break;
-            default:
-                break;
-        }
-    }
-
-    if(day_should_end)
-    {
-        New_day();
-        day_should_end = false;
-    }
 }
 
-void ovum::Speed_evo_behavior_manager::New_day()
+void Survive_behavior_manager::New_day()
 {
     finished_entities = 0;
 
@@ -51,7 +25,7 @@ void ovum::Speed_evo_behavior_manager::New_day()
         main_scene->Remove_food( main_scene->food.back().render_object_id );
     }
 
-    Spawn_food(40);
+    Spawn_food(20);
 
     auto & entieties = main_scene->entieties;
     auto & render_objects = main_scene->render_objects;
@@ -74,7 +48,6 @@ void ovum::Speed_evo_behavior_manager::New_day()
             {
                 auto new_id = main_scene->Add_entity();
                 entieties[new_id].speed = entieties[i].speed;
-                entieties[new_id].speed += (*evolution_distributor)(*generator);
                 entieties[new_id].ai_data = entieties[i].ai_data;
                 entieties[new_id].ai_data.state = Ai_state::HUNTING;
 
@@ -85,7 +58,53 @@ void ovum::Speed_evo_behavior_manager::New_day()
     }
 }
 
-void ovum::Speed_evo_behavior_manager::Update_hunting(eruptor::scene::Render_object & render_object, Entiety_data & entity_data, float delta_time)
+void Survive_behavior_manager::Update_ai(float delta_time)
+{
+    for(auto & entity : main_scene->entieties)
+    {
+        auto & render_object = main_scene->render_objects[ entity.render_object_id ];
+
+        switch(entity.ai_data.state)
+        {
+            case Ai_state::HUNTING:
+                Update_hunting(render_object, entity, delta_time * sim_state->simulation_speed);
+                break;
+            case Ai_state::RETURN:
+                Update_return(render_object, entity, delta_time * sim_state->simulation_speed);
+                break;
+            default:
+                break;
+        }
+    }
+
+    if(day_should_end)
+    {
+        New_day();
+        day_should_end = false;
+    }
+}
+
+void Survive_behavior_manager::React_to_event(const eruptor::event::Event& event)
+{
+    if(auto colision = event.Get_if<eruptor::event::Event::Collision_occurred>())
+    {
+        if(auto entity = main_scene->Get_if_is_entiety( colision->object_b_id ); main_scene->Get_if_is_food( colision->object_a_id ) && entity)
+        {
+            entity.value().get().Eat();
+
+            main_scene->Remove_food( colision->object_a_id );
+        }
+        else if(auto entity = main_scene->Get_if_is_entiety( colision->object_a_id ); entity && main_scene->Get_if_is_food( colision->object_b_id ) )
+        {
+            entity.value().get().Eat();
+
+            main_scene->Remove_food( colision->object_b_id );
+        }
+    }
+}
+
+
+void ovum::Survive_behavior_manager::Update_hunting(eruptor::scene::Render_object & render_object, Entiety_data & entity_data, float delta_time)
 {
     glm::vec3 pos = render_object.Get_position();
 
@@ -203,7 +222,7 @@ void ovum::Speed_evo_behavior_manager::Update_hunting(eruptor::scene::Render_obj
     }
 }
 
-void ovum::Speed_evo_behavior_manager::Update_return(eruptor::scene::Render_object& render_object, Entiety_data& entity_data, float delta_time)
+void ovum::Survive_behavior_manager::Update_return(eruptor::scene::Render_object& render_object, Entiety_data& entity_data, float delta_time)
 {
     glm::vec3 pos = render_object.Get_position();
 
@@ -294,45 +313,6 @@ void ovum::Speed_evo_behavior_manager::Update_return(eruptor::scene::Render_obje
         if(finished_entities >= main_scene->entieties.size())
         {
             day_should_end = true;
-        }
-    }
-}
-
-void ovum::Speed_evo_behavior_manager::Update_graph()
-{
-    gp_comm->Begin_frame();
-
-    entieties_speed.clear();
-
-    for(auto & entity : main_scene->entieties)
-    {
-        float bucket = std::round(entity.speed * 10.0f) / 10.0f;
-        entieties_speed[bucket]++;
-    }
-
-    for(auto [speed, amount] : entieties_speed)
-    {
-        gp_comm->Stage_data({speed, amount});
-    }
-
-    gp_comm->End_frame();
-}
-
-void ovum::Speed_evo_behavior_manager::React_to_event(const eruptor::event::Event & event)
-{
-    if(auto colision = event.Get_if<eruptor::event::Event::Collision_occurred>())
-    {
-        if(auto entity = main_scene->Get_if_is_entiety( colision->object_b_id ); main_scene->Get_if_is_food( colision->object_a_id ) && entity)
-        {
-            entity.value().get().Eat();
-
-            main_scene->Remove_food( colision->object_a_id );
-        }
-        else if(auto entity = main_scene->Get_if_is_entiety( colision->object_a_id ); entity && main_scene->Get_if_is_food( colision->object_b_id ) )
-        {
-            entity.value().get().Eat();
-
-            main_scene->Remove_food( colision->object_b_id );
         }
     }
 }
