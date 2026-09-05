@@ -26,10 +26,10 @@ void ovum::Size_speed_evo_behavior_manager::Update_ai(float delta_time)
         {
             ///@todo FIX DELTA TIME
             case Ai_state::HUNTING:
-                Update_hunting(render_object, entity, delta_time * sim_state->simulation_speed);
+                Update_hunting(render_object, entity, delta_time);
                 break;
             case Ai_state::RETURN:
-                Update_return(render_object, entity, delta_time * sim_state->simulation_speed);
+                Update_return(render_object, entity, delta_time);
                 break;
             default:
                 break;
@@ -76,10 +76,13 @@ void ovum::Size_speed_evo_behavior_manager::New_day()
                 auto new_id = main_scene->Add_entity();
                 entieties[new_id].speed = entieties[i].speed;
                 entieties[new_id].speed += (*evolution_distributor)(*generator);
+                entieties[new_id].size = entieties[i].size;
+                entieties[new_id].size += (*evolution_distributor)(*generator);
                 entieties[new_id].ai_data = entieties[i].ai_data;
                 entieties[new_id].ai_data.state = Ai_state::HUNTING;
 
                 render_objects[ entieties[new_id].render_object_id ] = render_objects[ entieties[i].render_object_id ];
+                render_objects[ entieties[new_id].render_object_id ].Set_scale( {entieties[new_id].size, entieties[new_id].size, entieties[new_id].size} );
             }
             entieties[i].food_eaten = 0;
         }

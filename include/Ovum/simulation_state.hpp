@@ -5,6 +5,7 @@
 #include <Ovum/simulation_scene.hpp>
 #include <Ovum/behaviors/speed_evo_behavior_manager.hpp>
 #include <Ovum/behaviors/survive_behavior_manager.hpp>
+#include <Ovum/behaviors/size_speed_evo_behavior_manager.hpp>
 #include <Ovum/gp_communicator.hpp>
 #include <random>
 
@@ -48,6 +49,7 @@ public:
     float wall_margin{3.0f};
 
     Speed_evo_behavior_manager speed_evo_behavior{};
+    Size_speed_evo_behavior_manager size_speed_evo_behavior{};
     Survive_behavior_manager survive_behavior;
     Entity_behavior_manager * behavior_manager{};
 };

@@ -2,6 +2,8 @@
 #define OVUM_SIZE_SPEED_EVO_BEHAVIOR_MANAGER_HPP
 
 #include <Ovum/behaviors/entity_behavior_manager.hpp>
+#include <Ovum/simulation_scene.hpp>
+#include <Eruptor/scene/scene.hpp>
 
 namespace ovum
 {
@@ -20,6 +22,8 @@ public:
 private:
     void Update_hunting(eruptor::scene::Render_object & render_object, Entiety_data & entity_data, float delta_time);
     void Update_return(eruptor::scene::Render_object & render_object, Entiety_data & entity_data, float delta_time);
+
+    std::unordered_map<float, uint32_t> entieties_speed{};
 };
 
 }

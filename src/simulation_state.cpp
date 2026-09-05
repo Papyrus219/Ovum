@@ -30,9 +30,10 @@ void ovum::Simulation_state::Init(App & app)
 
     this->main_scene = &app.main_scene;
 
+    size_speed_evo_behavior.Init( *this );
     speed_evo_behavior.Init( *this );
     survive_behavior.Init( *this );
-    Set_entity_behavior(speed_evo_behavior);
+    Set_entity_behavior(size_speed_evo_behavior);
 }
 
 void ovum::Simulation_state::Enter_state()
@@ -48,13 +49,13 @@ void ovum::Simulation_state::Enter_state()
 
 void ovum::Simulation_state::Update()
 {
-    constexpr float fixed_delta_time = 1.0f / 120.0f;
+    constexpr float fixed_delta_time = 1.0f / 60.0f;
     constexpr float max_frame_durration = 0.025;
 
     std::chrono::duration<float> delta_time_raw = (app->app_clock.now() - last_time);
     float frame_durration = std::min(delta_time_raw.count(), max_frame_durration);
 
-    time_acumulator += frame_durration;
+    time_acumulator += frame_durration * simulation_speed;
 
     while(time_acumulator >= fixed_delta_time)
     {

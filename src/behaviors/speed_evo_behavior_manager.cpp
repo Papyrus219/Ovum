@@ -23,12 +23,11 @@ void ovum::Speed_evo_behavior_manager::Update_ai(float delta_time)
 
         switch(entity.ai_data.state)
         {
-            ///@todo FIX DELTA TIME
             case Ai_state::HUNTING:
-                Update_hunting(render_object, entity, delta_time * sim_state->simulation_speed);
+                Update_hunting(render_object, entity, delta_time);
                 break;
             case Ai_state::RETURN:
-                Update_return(render_object, entity, delta_time * sim_state->simulation_speed);
+                Update_return(render_object, entity, delta_time);
                 break;
             default:
                 break;
