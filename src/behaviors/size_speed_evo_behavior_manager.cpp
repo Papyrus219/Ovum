@@ -8,10 +8,11 @@ using namespace ovum;
 
 void ovum::Size_speed_evo_behavior_manager::Setup()
 {
-    gp_comm->Enable_3d_points("Stats");
+   // gp_comm->Enable_3d_points("Stats");
+    gp_comm->Enable_2d_bars("SPEED");
     gp_comm->Set_x_axis_title("Speed");
     gp_comm->Set_y_axis_title("Entities count");
-    gp_comm->Set_z_axis_title("Size");
+    //gp_comm->Set_z_axis_title("Size");
     gp_comm->Set_x_axis_range(0.0, 30.0);
     gp_comm->Set_y_axis_range(0, 10);
 }
@@ -24,7 +25,6 @@ void ovum::Size_speed_evo_behavior_manager::Update_ai(float delta_time)
 
         switch(entity.ai_data.state)
         {
-            ///@todo FIX DELTA TIME
             case Ai_state::HUNTING:
                 Update_hunting(render_object, entity, delta_time);
                 break;
@@ -52,7 +52,7 @@ void ovum::Size_speed_evo_behavior_manager::New_day()
         main_scene->Remove_food( main_scene->food.back().render_object_id );
     }
 
-    Spawn_food(40);
+    Spawn_food(100);
 
     auto & entieties = main_scene->entieties;
     auto & render_objects = main_scene->render_objects;
@@ -67,7 +67,7 @@ void ovum::Size_speed_evo_behavior_manager::New_day()
     {
         if(entieties[i].ai_data.state == Ai_state::RESTING)
         {
-            entieties[i].energy = 30;
+            entieties[i].energy = 40;
             entieties[i].ai_data.state = Ai_state::HUNTING;
             entieties[i].ai_data.time_elapsed = 0;
 
@@ -80,9 +80,13 @@ void ovum::Size_speed_evo_behavior_manager::New_day()
                 entieties[new_id].size += (*evolution_distributor)(*generator);
                 entieties[new_id].ai_data = entieties[i].ai_data;
                 entieties[new_id].ai_data.state = Ai_state::HUNTING;
+                entieties[new_id].energy = 40;
+
+                if(entieties[new_id].speed < 0.1) entieties[new_id].speed = 0.1;
+                if(entieties[new_id].size < 0.1) entieties[new_id].size = 0.1;
 
                 render_objects[ entieties[new_id].render_object_id ] = render_objects[ entieties[i].render_object_id ];
-                render_objects[ entieties[new_id].render_object_id ].Set_scale( {entieties[new_id].size, entieties[new_id].size, entieties[new_id].size} );
+                render_objects[ entieties[new_id].render_object_id ].Set_scale( {entieties[new_id].size + 5, entieties[new_id].size + 5, entieties[new_id].size + 5} );
             }
             entieties[i].food_eaten = 0;
         }
@@ -128,17 +132,11 @@ void ovum::Size_speed_evo_behavior_manager::Update_hunting(eruptor::scene::Rende
     {
         entity_data.ai_data.time_elapsed += delta_time;
 
-        if(entity_data.ai_data.time_elapsed >= 0.05)
-        {
-            if((*decision_distributor)(*generator) == 1)
-            {
-                entity_data.ai_data.is_desire_rot = false;
-                entity_data.ai_data.desire_y_rot += (*rotation_distributor)(*generator);
-                entity_data.ai_data.desire_y_rot = sim_state->Normilize_angle(entity_data.ai_data.desire_y_rot);;
-            }
+        entity_data.ai_data.is_desire_rot = false;
+        entity_data.ai_data.desire_y_rot += (*rotation_distributor)(*generator);
+        entity_data.ai_data.desire_y_rot = sim_state->Normilize_angle(entity_data.ai_data.desire_y_rot);;
 
-            entity_data.ai_data.time_elapsed = 0;
-        }
+        entity_data.ai_data.time_elapsed = 0;
     }
     else
     {
@@ -162,7 +160,7 @@ void ovum::Size_speed_evo_behavior_manager::Update_hunting(eruptor::scene::Rende
 
     glm::vec3 forward  = render_object.Get_rotaion() * glm::vec3{1.0f, 0.0f, 0.0f} ;
     render_object.Move( forward * entity_data.speed * delta_time );
-    entity_data.energy -= entity_data.speed * delta_time;
+    entity_data.energy -= (entity_data.size * entity_data.size * entity_data.size) * (entity_data.speed * entity_data.speed) * delta_time;
 
     if(entity_data.energy < 5 && entity_data.food_eaten > 0)
     {
@@ -257,7 +255,7 @@ void ovum::Size_speed_evo_behavior_manager::Update_return(eruptor::scene::Render
 
     glm::vec3 forward = render_object.Get_rotaion() * glm::vec3{1.0f, 0.0f, 0.0f};
     render_object.Move( forward * entity_data.speed * delta_time );
-    entity_data.energy -= entity_data.speed * delta_time;
+    entity_data.energy -= (entity_data.size * entity_data.size * entity_data.size) * (entity_data.speed * entity_data.speed) * delta_time;
 
     float wall_margin{0.3f};
 
@@ -322,6 +320,9 @@ void ovum::Size_speed_evo_behavior_manager::Update_graph()
     gp_comm->End_frame();
 }
 
+#include <print>
+#include <iostream>
+
 void ovum::Size_speed_evo_behavior_manager::React_to_event(const eruptor::event::Event & event)
 {
     if(auto colision = event.Get_if<eruptor::event::Event::Collision_occurred>())
@@ -337,6 +338,27 @@ void ovum::Size_speed_evo_behavior_manager::React_to_event(const eruptor::event:
             entity.value().get().Eat();
 
             main_scene->Remove_food( colision->object_b_id );
+        }
+
+        if(auto entity_a_ = main_scene->Get_if_is_entiety( colision->object_a_id ), entity_b_ = main_scene->Get_if_is_entiety( colision->object_b_id); entity_a_ && entity_b_)
+        {
+            auto entity_a = entity_a_.value().get();
+            auto entity_b = entity_b_.value().get();
+
+            if(entity_a.size >= (1.30 * entity_b.size) && entity_b.ai_data.state == Ai_state::HUNTING)
+            {
+                std::println(std::clog, "KANIBALIZM!");
+                entity_a.Eat();
+
+                main_scene->Remove_entity( entity_b.render_object_id );
+            }
+            else if(entity_b.size >= (1.30 * entity_a.size) && entity_a.ai_data.state == Ai_state::HUNTING)
+            {
+                std::println(std::clog, "KANIBALIZM!");
+                entity_b.Eat();
+
+                main_scene->Remove_entity( entity_a.render_object_id );
+            }
         }
     }
 }

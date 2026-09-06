@@ -19,8 +19,8 @@ struct Entiety_data
 
     Ai_data ai_data{};
     float speed{};
-    float size{6};
-    float energy{30};
+    float size{1};
+    float energy{40};
 
     uint32_t render_object_id{};
 

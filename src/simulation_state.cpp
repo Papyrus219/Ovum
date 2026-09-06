@@ -133,7 +133,7 @@ void ovum::Simulation_state::React_to_event(const eruptor::event::Event & event)
 
         if(simulation_speed > 100)
         {
-            simulation_speed = 30;
+            simulation_speed = 100;
         }
     }
     else if(auto key_pressed = event.Get_if<eruptor::event::Event::Key_pressed>())
