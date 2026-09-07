@@ -24,6 +24,7 @@ private:
     void Update_return(eruptor::scene::Render_object & render_object, Entiety_data & entity_data, float delta_time);
 
     std::unordered_map<float, uint32_t> entieties_speed{};
+    std::uniform_real_distribution<float> size_evolution_distributor{-0.29, 0.29};
 };
 
 }

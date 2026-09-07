@@ -36,6 +36,11 @@ void ovum::Size_speed_evo_behavior_manager::Update_ai(float delta_time)
         }
     }
 
+    if(finished_entities >= main_scene->entieties.size())
+    {
+        day_should_end = true;
+    }
+
     if(day_should_end)
     {
         New_day();
@@ -77,7 +82,7 @@ void ovum::Size_speed_evo_behavior_manager::New_day()
                 entieties[new_id].speed = entieties[i].speed;
                 entieties[new_id].speed += (*evolution_distributor)(*generator);
                 entieties[new_id].size = entieties[i].size;
-                entieties[new_id].size += (*evolution_distributor)(*generator);
+                entieties[new_id].size += (size_evolution_distributor)(*generator);
                 entieties[new_id].ai_data = entieties[i].ai_data;
                 entieties[new_id].ai_data.state = Ai_state::HUNTING;
                 entieties[new_id].energy = 40;
@@ -132,18 +137,25 @@ void ovum::Size_speed_evo_behavior_manager::Update_hunting(eruptor::scene::Rende
     {
         entity_data.ai_data.time_elapsed += delta_time;
 
-        entity_data.ai_data.is_desire_rot = false;
-        entity_data.ai_data.desire_y_rot += (*rotation_distributor)(*generator);
-        entity_data.ai_data.desire_y_rot = sim_state->Normilize_angle(entity_data.ai_data.desire_y_rot);;
+        if(entity_data.ai_data.time_elapsed >= 1.0)
+        {
+            entity_data.ai_data.is_desire_rot = false;
+            entity_data.ai_data.desire_y_rot += (*rotation_distributor)(*generator);
+            if((*decision_distributor)(*generator))
+            {
+                entity_data.ai_data.desire_y_rot *= -1.0f;
+            }
+            entity_data.ai_data.desire_y_rot = sim_state->Normilize_angle(entity_data.ai_data.desire_y_rot);
 
-        entity_data.ai_data.time_elapsed = 0;
+            entity_data.ai_data.time_elapsed = 0;
+        }
     }
     else
     {
         float diff = sim_state->Normilize_angle( entity_data.ai_data.desire_y_rot - entity_data.ai_data.curr_y_rot );
         if(std::abs(diff) > 0.05f)
         {
-            float step = std::copysign(entity_data.speed * delta_time, diff);
+            float step = std::copysign( std::max(1.0f, entity_data.speed) * delta_time, diff);
             if(std::abs(step) > std::abs(diff))
             {
                 step = diff;
@@ -173,10 +185,6 @@ void ovum::Size_speed_evo_behavior_manager::Update_hunting(eruptor::scene::Rende
         dead_ids.push_back( entity_data.render_object_id );
 
         finished_entities++;
-        if(finished_entities >= main_scene->entieties.size())
-        {
-            day_should_end = true;
-        }
     }
 
     pos = render_object.Get_position();
@@ -255,7 +263,7 @@ void ovum::Size_speed_evo_behavior_manager::Update_return(eruptor::scene::Render
 
     glm::vec3 forward = render_object.Get_rotaion() * glm::vec3{1.0f, 0.0f, 0.0f};
     render_object.Move( forward * entity_data.speed * delta_time );
-    entity_data.energy -= (entity_data.size * entity_data.size * entity_data.size) * (entity_data.speed * entity_data.speed) * delta_time;
+    entity_data.energy -= ( entity_data.size) * (entity_data.speed * entity_data.speed) * delta_time;
 
     float wall_margin{0.3f};
 
@@ -281,10 +289,6 @@ void ovum::Size_speed_evo_behavior_manager::Update_return(eruptor::scene::Render
         }
 
         finished_entities++;
-        if(finished_entities >= main_scene->entieties.size())
-        {
-            day_should_end = true;
-        }
     }
     else if(entity_data.energy <= 0)
     {
@@ -293,10 +297,6 @@ void ovum::Size_speed_evo_behavior_manager::Update_return(eruptor::scene::Render
         dead_ids.push_back( entity_data.render_object_id );
 
         finished_entities++;
-        if(finished_entities >= main_scene->entieties.size())
-        {
-            day_should_end = true;
-        }
     }
 }
 
@@ -345,14 +345,14 @@ void ovum::Size_speed_evo_behavior_manager::React_to_event(const eruptor::event:
             auto entity_a = entity_a_.value().get();
             auto entity_b = entity_b_.value().get();
 
-            if(entity_a.size >= (1.30 * entity_b.size) && entity_b.ai_data.state == Ai_state::HUNTING)
+            if(entity_a.size >= (1.30 * entity_b.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
             {
                 std::println(std::clog, "KANIBALIZM!");
                 entity_a.Eat();
 
                 main_scene->Remove_entity( entity_b.render_object_id );
             }
-            else if(entity_b.size >= (1.30 * entity_a.size) && entity_a.ai_data.state == Ai_state::HUNTING)
+            else if(entity_b.size >= (1.30 * entity_a.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
             {
                 std::println(std::clog, "KANIBALIZM!");
                 entity_b.Eat();

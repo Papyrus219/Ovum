@@ -35,7 +35,7 @@ public:
     std::mt19937 generator{ random_device() };
     std::uniform_int_distribution<uint8_t> decision_distributor{0, 1};
     std::uniform_real_distribution<float> evolution_distributor{-0.5, 0.5};
-    std::uniform_real_distribution<float> rotation_distributor{-glm::half_pi<float>(), glm::half_pi<float>()};
+    std::uniform_real_distribution<float> rotation_distributor{glm::half_pi<float>() / 6.0f, glm::half_pi<float>()};
     std::uniform_real_distribution<float> x_pos_distribution{};
     std::uniform_real_distribution<float> z_pos_distribution{};
 
