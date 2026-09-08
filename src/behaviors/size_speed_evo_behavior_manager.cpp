@@ -91,7 +91,7 @@ void ovum::Size_speed_evo_behavior_manager::New_day()
                 if(entieties[new_id].size < 0.1) entieties[new_id].size = 0.1;
 
                 render_objects[ entieties[new_id].render_object_id ] = render_objects[ entieties[i].render_object_id ];
-                render_objects[ entieties[new_id].render_object_id ].Set_scale( {entieties[new_id].size + 5, entieties[new_id].size + 5, entieties[new_id].size + 5} );
+                render_objects[ entieties[new_id].render_object_id ].Set_scale( {(2 * entieties[new_id].size) + 4, (2 * entieties[new_id].size) + 4, (2 * entieties[new_id].size) + 4} );
             }
             entieties[i].food_eaten = 0;
         }
