@@ -112,7 +112,8 @@ uint32_t ovum::Simulation_scene::Add_entity()
     render_objects[ entieties.back().render_object_id ].Reset();
     render_objects[ entieties.back().render_object_id ].Set_model(entieties.back().render_object_id, blob_handle);
     render_objects[ entieties.back().render_object_id ].Set_position( {0, 0.1, 0} );
-    render_objects[ entieties.back().render_object_id ].Set_scale( {6, 6, 6}, 0.1 );
+    render_objects[ entieties.back().render_object_id ].snap_y = 0.1;
+    render_objects[ entieties.back().render_object_id ].Set_scale( {6, 6, 6});
     render_objects[ entieties.back().render_object_id ].color = eruptor::resource::Color{100, 200, 60};
     render_objects[ entieties.back().render_object_id ].shading_type = eruptor::scene::Shading_type::OPAQUE;
 
@@ -156,7 +157,8 @@ uint32_t ovum::Simulation_scene::Add_food()
     render_objects[ food.back().render_object_id ].Reset();
     render_objects[ food.back().render_object_id ].Set_model(food.back().render_object_id, food_handle);
     render_objects[ food.back().render_object_id ].Set_position( {0, 0.1, 0} );
-    render_objects[ food.back().render_object_id ].Set_scale( {0.2, 0.2, 0.2}, 0.1 );
+    render_objects[ food.back().render_object_id ].snap_y = 0.1;
+    render_objects[ food.back().render_object_id ].Set_scale( {0.2, 0.2, 0.2} );
     render_objects[ food.back().render_object_id ].color = eruptor::resource::Color{60, 60, 200};
     render_objects[ food.back().render_object_id ].shading_type = eruptor::scene::Shading_type::OPAQUE;
 
@@ -202,7 +204,8 @@ uint32_t ovum::Simulation_scene::Add_light_source()
     render_objects[ light_sources.back().render_object_id ].Reset();
     render_objects[ light_sources.back().render_object_id ].Set_model(light_sources.back().render_object_id, light_source_handle);
     render_objects[ light_sources.back().render_object_id ].Set_position( {0, 0.1, 0} );
-    render_objects[ light_sources.back().render_object_id ].Set_scale( {0.2, 0.2, 0.2}, 0.1 );
+    render_objects[ light_sources.back().render_object_id ].snap_y = 0.1;
+    render_objects[ light_sources.back().render_object_id ].Set_scale( {0.2, 0.2, 0.2});
     render_objects[ light_sources.back().render_object_id ].color = eruptor::resource::Color{255, 255, 255};
     render_objects[ light_sources.back().render_object_id ].shading_type = eruptor::scene::Shading_type::LIGHT_CASTER;
 

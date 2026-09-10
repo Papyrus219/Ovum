@@ -29,8 +29,8 @@ void ovum::App::Init()
 
     for(auto & entity : main_scene.entieties)
     {
-        entity.ai_data.curr_y_rot = glm::eulerAngles( main_scene.render_objects[ entity.render_object_id ].Get_rotaion() ).y;
-        entity.ai_data.curr_y_rot = glm::eulerAngles( main_scene.render_objects[ entity.render_object_id ].Get_rotaion() ).y;
+        entity.ai_data.curr_y_rot = glm::eulerAngles( main_scene.render_objects[ entity.render_object_id ].Get_rotation() ).y;
+        entity.ai_data.curr_y_rot = glm::eulerAngles( main_scene.render_objects[ entity.render_object_id ].Get_rotation() ).y;
     }
 
     editor_state.Init( *this );
@@ -47,7 +47,7 @@ void ovum::App::Init()
 
     if(floor_it != main_scene.objects_aliases.end())
     {
-        auto floor_aabb = main_scene.render_objects[ floor_it->second ].Get_aabb();
+        auto floor_aabb = eruptor::physic::AABB{{},{}};//main_scene.render_objects[ floor_it->second ].Get_aabb();
 
         world_min = floor_aabb.min;
         world_max = floor_aabb.max;

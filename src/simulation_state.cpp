@@ -40,7 +40,7 @@ void ovum::Simulation_state::Enter_state()
 {
     for(auto & entity : main_scene->entieties)
     {
-        entity.ai_data.curr_y_rot = glm::eulerAngles( main_scene->render_objects[ entity.render_object_id ].Get_rotaion() ).y;
+        entity.ai_data.curr_y_rot = glm::eulerAngles( main_scene->render_objects[ entity.render_object_id ].Get_rotation() ).y;
         entity.Reset();
     }
 
@@ -61,8 +61,7 @@ void ovum::Simulation_state::Update()
     {
         behavior_manager->Update_ai( fixed_delta_time );
 
-        app->physic_manager->Chceck_colisions( *main_scene, fixed_delta_time );
-
+        app->physic_manager->Update_scene(*main_scene, fixed_delta_time);
         time_acumulator -= fixed_delta_time;
     }
 
