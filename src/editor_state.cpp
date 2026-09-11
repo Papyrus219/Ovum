@@ -30,7 +30,6 @@ void ovum::Editor_state::Init(App & app)
 {
     Assign_app(app);
 
-    app.scene_parser.Assign_resource_manager(*app.resources);
     scene_saver.Assign_resource_manager(*app.resources);
 
     this->main_scene = &app.main_scene;
