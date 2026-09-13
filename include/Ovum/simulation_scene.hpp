@@ -83,6 +83,7 @@ struct Simulation_scene: public eruptor::scene::Scene
     uint32_t next_light_source_alias_id{};
 
     eruptor::resource::Resource_manager * resource_manager{};
+    eruptor::physic::Physic_manager * physic_manager{};
 };
 
 }

@@ -148,7 +148,7 @@ void ovum::Editor_state::Render()
 
 void ovum::Editor_state::Reload_scene()
 {
-    auto parsed_scene = app->scene_parser.Load_scene(app->current_scene_path);
+    auto parsed_scene = app->resources->scene_parser.Load_scene(app->current_scene_path);
     if(parsed_scene)
     {
         *main_scene = *parsed_scene;

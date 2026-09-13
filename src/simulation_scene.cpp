@@ -1,4 +1,5 @@
 #include <Ovum/simulation_scene.hpp>
+#include <Eruptor/physic_manager.hpp>
 #include <iostream>
 #include <print>
 
@@ -9,6 +10,7 @@ void ovum::Simulation_scene::Init(eruptor::resource::Resource_manager & resource
     light_source_handle = resource_manager.Get_model_handle( "light_source_model" );
 
     this->resource_manager = &resource_manager;
+    this->physic_manager = &resource_manager.Get_assigned_physic_manager();
 }
 
 ovum::Simulation_scene::Simulation_scene(const Simulation_scene & other): eruptor::scene::Scene{ other }, free_objects{ other.free_objects }, floor{ other.floor }, entieties{ other.entieties }, food{ other.food }, light_sources{ other.light_sources }, blob_handle{ other.blob_handle }, food_handle{ other.food_handle }, light_source_handle{ other.light_source_handle }, next_entity_alias_id{ other.next_entity_alias_id }, next_food_alias_id{ other.next_food_alias_id }, next_light_source_alias_id{ other.next_light_source_alias_id }
@@ -117,6 +119,11 @@ uint32_t ovum::Simulation_scene::Add_entity()
     render_objects[ entieties.back().render_object_id ].color = eruptor::resource::Color{100, 200, 60};
     render_objects[ entieties.back().render_object_id ].shading_type = eruptor::scene::Shading_type::OPAQUE;
 
+    if(free_objects.empty())
+    {
+        physic_manager->Add_hitbox(0, entieties.back().render_object_id, *this);
+    }
+
     return entieties.size() - 1;
 }
 
@@ -161,6 +168,11 @@ uint32_t ovum::Simulation_scene::Add_food()
     render_objects[ food.back().render_object_id ].Set_scale( {0.2, 0.2, 0.2} );
     render_objects[ food.back().render_object_id ].color = eruptor::resource::Color{60, 60, 200};
     render_objects[ food.back().render_object_id ].shading_type = eruptor::scene::Shading_type::OPAQUE;
+
+    if(free_objects.empty())
+    {
+        physic_manager->Add_hitbox(0, food.back().render_object_id, *this);
+    }
 
     return food.size() - 1;
 }

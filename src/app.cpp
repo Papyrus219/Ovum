@@ -8,7 +8,6 @@ using namespace ovum;
 
 ovum::App::App() : event_manager{ eruptor::event::event_manager }
 {
-    event_manager.Add_listener(*this);
 }
 
 void ovum::App::Init()
@@ -47,7 +46,8 @@ void ovum::App::Init()
 
     if(floor_it != main_scene.objects_aliases.end())
     {
-        auto floor_aabb = eruptor::physic::AABB{{},{}};//main_scene.render_objects[ floor_it->second ].Get_aabb();
+        std::println(std::clog, "FLOOR ID: {}", floor_it->second);
+        auto floor_aabb = physic_manager->Get_hitbox_data(0, floor_it->second ).Get_aabb(main_scene);//main_scene.render_objects[ floor_it->second ].Get_aabb();
 
         world_min = floor_aabb.min;
         world_max = floor_aabb.max;
@@ -57,6 +57,7 @@ void ovum::App::Init()
 
     current_state = &editor_state;
     last_time = app_clock.now();
+    event_manager.Add_listener(*this);
 }
 
 void ovum::App::Start_loop()
