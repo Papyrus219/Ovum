@@ -103,7 +103,7 @@ void ovum::Size_speed_evo_behavior_manager::Update_hunting(eruptor::scene::Rende
     glm::vec3 pos = render_object.Get_position();
 
     bool near_wall{};
-    glm::vec3 desired_dir = render_object.Get_rotaion() * glm::vec3{1.0f, 0.0f, 0.0f};
+    glm::vec3 desired_dir = render_object.Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f};
 
     if(pos.x > app->world_max.x - sim_state->wall_margin)
     {
@@ -140,11 +140,10 @@ void ovum::Size_speed_evo_behavior_manager::Update_hunting(eruptor::scene::Rende
         if(entity_data.ai_data.time_elapsed >= 1.0)
         {
             entity_data.ai_data.is_desire_rot = false;
-            entity_data.ai_data.desire_y_rot += (*rotation_distributor)(*generator);
-            if((*decision_distributor)(*generator))
-            {
-                entity_data.ai_data.desire_y_rot *= -1.0f;
-            }
+
+            entity_data.ai_data.desire_y_rot = entity_data.ai_data.curr_y_rot
+            + (*rotation_distributor)(*generator) * ((*decision_distributor)(*generator) ? 1.0f : -1.0f);
+
             entity_data.ai_data.desire_y_rot = sim_state->Normilize_angle(entity_data.ai_data.desire_y_rot);
 
             entity_data.ai_data.time_elapsed = 0;
@@ -170,7 +169,7 @@ void ovum::Size_speed_evo_behavior_manager::Update_hunting(eruptor::scene::Rende
         }
     }
 
-    glm::vec3 forward  = render_object.Get_rotaion() * glm::vec3{1.0f, 0.0f, 0.0f} ;
+    glm::vec3 forward  = render_object.Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f} ;
     render_object.Move( forward * entity_data.speed * delta_time );
     entity_data.energy -= (entity_data.size * entity_data.size * entity_data.size) * (entity_data.speed * entity_data.speed) * delta_time;
 
@@ -261,9 +260,9 @@ void ovum::Size_speed_evo_behavior_manager::Update_return(eruptor::scene::Render
         entity_data.ai_data.curr_y_rot = sim_state->Normilize_angle(entity_data.ai_data.curr_y_rot + step);
     }
 
-    glm::vec3 forward = render_object.Get_rotaion() * glm::vec3{1.0f, 0.0f, 0.0f};
+    glm::vec3 forward = render_object.Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f};
     render_object.Move( forward * entity_data.speed * delta_time );
-    entity_data.energy -= ( entity_data.size) * (entity_data.speed * entity_data.speed) * delta_time;
+    entity_data.energy -= ( entity_data.size * entity_data.size * entity_data.size) * (entity_data.speed * entity_data.speed) * delta_time;
 
     float wall_margin{0.3f};
 

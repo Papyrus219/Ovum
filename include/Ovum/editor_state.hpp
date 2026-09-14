@@ -2,7 +2,7 @@
 #define OVUM_EDITOR_STATE_HPP
 
 #include <Ovum/app_state.hpp>
-#include <Eruptor/scene/scene_parser.hpp>
+#include <Eruptor/resource/scene_parser.hpp>
 #include <Eruptor/scene/scene_saver.hpp>
 #include <Eruptor/event/event_manager.hpp>
 #include <Ovum/simulation_parser.hpp>
