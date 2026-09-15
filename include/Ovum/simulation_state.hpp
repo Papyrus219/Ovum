@@ -6,6 +6,7 @@
 #include <Ovum/behaviors/speed_evo_behavior_manager.hpp>
 #include <Ovum/behaviors/survive_behavior_manager.hpp>
 #include <Ovum/behaviors/size_speed_evo_behavior_manager.hpp>
+#include <Ovum/behaviors/sense_size_speed_evo_behavior_manager.hpp>
 #include <Ovum/gp_communicator.hpp>
 #include <random>
 
@@ -54,6 +55,7 @@ public:
 
     Speed_evo_behavior_manager speed_evo_behavior{};
     Size_speed_evo_behavior_manager size_speed_evo_behavior{};
+    Sense_size_speed_evo_behavior_manager sense_speed_size_evo_behavior{};
     Survive_behavior_manager survive_behavior;
     Entity_behavior_manager * behavior_manager{};
 };

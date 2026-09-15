@@ -34,10 +34,11 @@ void ovum::Simulation_state::Init(App & app)
 
     this->main_scene = &app.main_scene;
 
+    sense_speed_size_evo_behavior.Init( *this );
     size_speed_evo_behavior.Init( *this );
     speed_evo_behavior.Init( *this );
     survive_behavior.Init( *this );
-    Set_entity_behavior(size_speed_evo_behavior);
+    Set_entity_behavior(sense_speed_size_evo_behavior);
 }
 
 void ovum::Simulation_state::Enter_state()
