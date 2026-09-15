@@ -9,12 +9,12 @@ using namespace ovum;
 void ovum::Size_speed_evo_behavior_manager::Setup()
 {
    // gp_comm->Enable_3d_points("Stats");
-    gp_comm->Enable_2d_bars("SPEED");
-    gp_comm->Set_x_axis_title("Speed");
-    gp_comm->Set_y_axis_title("Entities count");
+    gp_comm_stats.Enable_2d_bars("SPEED");
+    gp_comm_stats.Set_x_axis_title("Speed");
+    gp_comm_stats.Set_y_axis_title("Entities count");
     //gp_comm->Set_z_axis_title("Size");
-    gp_comm->Set_x_axis_range(0.0, 30.0);
-    gp_comm->Set_y_axis_range(0, 10);
+    gp_comm_stats.Set_x_axis_range(0.0, 30.0);
+    gp_comm_stats.Set_y_axis_range(0, 10);
 }
 
 void ovum::Size_speed_evo_behavior_manager::Update_ai(float delta_time)
@@ -96,6 +96,9 @@ void ovum::Size_speed_evo_behavior_manager::New_day()
             entieties[i].food_eaten = 0;
         }
     }
+
+    Update_graph();
+    app->simulation_state.Update_graph();
 }
 
 void ovum::Size_speed_evo_behavior_manager::Update_hunting(eruptor::scene::Render_object & render_object, Entiety_data & entity_data, float delta_time)
@@ -301,7 +304,7 @@ void ovum::Size_speed_evo_behavior_manager::Update_return(eruptor::scene::Render
 
 void ovum::Size_speed_evo_behavior_manager::Update_graph()
 {
-    gp_comm->Begin_frame();
+    gp_comm_stats.Begin_frame();
 
     entieties_speed.clear();
 
@@ -313,10 +316,10 @@ void ovum::Size_speed_evo_behavior_manager::Update_graph()
 
     for(auto [speed, amount] : entieties_speed)
     {
-        gp_comm->Stage_data({speed, amount});
+        gp_comm_stats.Stage_data({speed, amount});
     }
 
-    gp_comm->End_frame();
+    gp_comm_stats.End_frame();
 }
 
 #include <print>
@@ -326,37 +329,41 @@ void ovum::Size_speed_evo_behavior_manager::React_to_event(const eruptor::event:
 {
     if(auto colision = event.Get_if<eruptor::event::Event::Collision_occurred>())
     {
-        if(auto entity = main_scene->Get_if_is_entiety( colision->object_b_id ); main_scene->Get_if_is_food( colision->object_a_id ) && entity)
+        if( (colision->object_a_layer | colision->object_b_layer) == 0)
         {
-            entity.value().get().Eat();
 
-            main_scene->Remove_food( colision->object_a_id );
-        }
-        else if(auto entity = main_scene->Get_if_is_entiety( colision->object_a_id ); entity && main_scene->Get_if_is_food( colision->object_b_id ) )
-        {
-            entity.value().get().Eat();
-
-            main_scene->Remove_food( colision->object_b_id );
-        }
-
-        if(auto entity_a_ = main_scene->Get_if_is_entiety( colision->object_a_id ), entity_b_ = main_scene->Get_if_is_entiety( colision->object_b_id); entity_a_ && entity_b_)
-        {
-            auto entity_a = entity_a_.value().get();
-            auto entity_b = entity_b_.value().get();
-
-            if(entity_a.size >= (1.30 * entity_b.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
+            if(auto entity = main_scene->Get_if_is_entiety( colision->object_b_id ); main_scene->Get_if_is_food( colision->object_a_id ) && entity)
             {
-                std::println(std::clog, "KANIBALIZM!");
-                entity_a.Eat();
+                entity.value().get().Eat();
 
-                main_scene->Remove_entity( entity_b.render_object_id );
+                main_scene->Remove_food( colision->object_a_id );
             }
-            else if(entity_b.size >= (1.30 * entity_a.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
+            else if(auto entity = main_scene->Get_if_is_entiety( colision->object_a_id ); entity && main_scene->Get_if_is_food( colision->object_b_id ) )
             {
-                std::println(std::clog, "KANIBALIZM!");
-                entity_b.Eat();
+                entity.value().get().Eat();
 
-                main_scene->Remove_entity( entity_a.render_object_id );
+                main_scene->Remove_food( colision->object_b_id );
+            }
+
+            if(auto entity_a_ = main_scene->Get_if_is_entiety( colision->object_a_id ), entity_b_ = main_scene->Get_if_is_entiety( colision->object_b_id); entity_a_ && entity_b_)
+            {
+                auto entity_a = entity_a_.value().get();
+                auto entity_b = entity_b_.value().get();
+
+                if(entity_a.size >= (1.30 * entity_b.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
+                {
+                    std::println(std::clog, "KANIBALIZM!");
+                    entity_a.Eat();
+
+                    main_scene->Remove_entity( entity_b.render_object_id );
+                }
+                else if(entity_b.size >= (1.30 * entity_a.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
+                {
+                    std::println(std::clog, "KANIBALIZM!");
+                    entity_b.Eat();
+
+                    main_scene->Remove_entity( entity_a.render_object_id );
+                }
             }
         }
     }

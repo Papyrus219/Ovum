@@ -28,6 +28,10 @@ void ovum::Simulation_state::Init(App & app)
 {
     Assign_app( app );
 
+    gp_comm_pop.Enable_2d_bars("POPULATION", false);
+    gp_comm_pop.Set_x_axis_title("Day");
+    gp_comm_pop.Set_y_axis_title("Population");
+
     this->main_scene = &app.main_scene;
 
     size_speed_evo_behavior.Init( *this );
@@ -65,9 +69,19 @@ void ovum::Simulation_state::Update()
         time_acumulator -= fixed_delta_time;
     }
 
-    behavior_manager->Update_graph();
-
     last_time = app->app_clock.now();
+}
+
+void ovum::Simulation_state::Update_graph()
+{
+    population.push_back( app->main_scene.entieties.size() );
+
+    gp_comm_pop.Begin_frame();
+    for(auto i{0UZ}; i < population.size(); i++)
+    {
+        gp_comm_pop.Stage_data({i, population[i]});
+    }
+    gp_comm_pop.End_frame();
 }
 
 void ovum::Simulation_state::Render()

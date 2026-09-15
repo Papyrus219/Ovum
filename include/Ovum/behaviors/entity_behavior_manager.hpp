@@ -2,6 +2,7 @@
 #define OVUM_ENTITY_BEHAVIOR_MANAGER_HPP
 
 #include <Eruptor/event/event.hpp>
+#include <Ovum/gp_communicator.hpp>
 #include <cstdint>
 #include <random>
 
@@ -11,7 +12,6 @@ namespace ovum
 class Simulation_state;
 struct Simulation_scene;
 class App;
-class GP_communicator;
 
 class Entity_behavior_manager
 {
@@ -40,7 +40,8 @@ protected:
     std::uniform_real_distribution<float> * z_pos_distribution{};
 
     Simulation_state * sim_state{};
-    ovum::GP_communicator * gp_comm{};
+    ovum::GP_communicator * gp_comm_pop{};
+    ovum::GP_communicator gp_comm_stats{};
 
     ovum::Simulation_scene * main_scene{};
     ovum::App * app{};

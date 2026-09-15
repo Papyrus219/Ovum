@@ -8,7 +8,7 @@ using namespace ovum;
 
 void Survive_behavior_manager::Setup()
 {
-    gp_comm->Enable_2d_bars("NO DATA");
+    gp_comm_stats.Enable_2d_bars("NO DATA");
 }
 
 void Survive_behavior_manager::Update_graph()

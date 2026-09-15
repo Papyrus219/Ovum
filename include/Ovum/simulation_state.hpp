@@ -22,6 +22,8 @@ public:
     virtual void Render() override;
     virtual void React_to_event(const eruptor::event::Event & event) override;
 
+    void Update_graph();
+
     virtual std::string_view Get_state_name() override {return "Simulation";}
 
     void Set_entity_behavior(Entity_behavior_manager & entity_behavior);
@@ -39,9 +41,11 @@ public:
     std::uniform_real_distribution<float> x_pos_distribution{};
     std::uniform_real_distribution<float> z_pos_distribution{};
 
+    std::vector<uint16_t> population{};
+
     float time_acumulator{};
 
-    GP_communicator gp_comm{};
+    GP_communicator gp_comm_pop{};
     std::chrono::high_resolution_clock::time_point last_time{};
 
     float simulation_speed{15};

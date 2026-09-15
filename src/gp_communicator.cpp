@@ -53,11 +53,17 @@ void ovum::GP_communicator::Enable_2d_points(const std::string & title)
     mode = GP_mode::MODE_2D_POINT;
 }
 
-void ovum::GP_communicator::Enable_2d_bars(const std::string& title)
+void ovum::GP_communicator::Enable_2d_bars(const std::string& title, bool enable_floting_points)
 {
     fprintf(gnuplot, "set title '%s'\n", title.c_str());
     fprintf(gnuplot, "set boxwidth 0.08\n");
     fprintf(gnuplot, "set style fill solid 0.6 border -1\n");
+
+    if(!enable_floting_points)
+    {
+        fprintf(gnuplot, "set xtics 1\n");
+        fprintf(gnuplot, "set ytics 1\n");
+    }
 
     mode = GP_mode::Mode_2D_BARS;
 }

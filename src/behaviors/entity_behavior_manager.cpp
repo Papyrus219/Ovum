@@ -10,7 +10,7 @@ void ovum::Entity_behavior_manager::Init(Simulation_state & sim_state)
     this->sim_state = &sim_state;
     this->main_scene = this->sim_state->main_scene;
     this->app = this->sim_state->app;
-    this->gp_comm = &this->sim_state->gp_comm;
+    this->gp_comm_pop = &this->sim_state->gp_comm_pop;
 
     this->generator = &this->sim_state->generator;
     this->decision_distributor = &this->sim_state->decision_distributor;

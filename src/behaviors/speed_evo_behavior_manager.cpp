@@ -8,11 +8,11 @@ using namespace ovum;
 
 void ovum::Speed_evo_behavior_manager::Setup()
 {
-    gp_comm->Enable_2d_bars("Speed");
-    gp_comm->Set_x_axis_title("Speed");
-    gp_comm->Set_y_axis_title("Entities count");
-    gp_comm->Set_x_axis_range(0.0, 30.0);
-    gp_comm->Set_y_axis_range(0, 10);
+    gp_comm_stats.Enable_2d_bars("Speed");
+    gp_comm_stats.Set_x_axis_title("Speed");
+    gp_comm_stats.Set_y_axis_title("Entities count");
+    gp_comm_stats.Set_x_axis_range(0.0, 30.0);
+    gp_comm_stats.Set_y_axis_range(0, 10);
 }
 
 void ovum::Speed_evo_behavior_manager::Update_ai(float delta_time)
@@ -299,7 +299,7 @@ void ovum::Speed_evo_behavior_manager::Update_return(eruptor::scene::Render_obje
 
 void ovum::Speed_evo_behavior_manager::Update_graph()
 {
-    gp_comm->Begin_frame();
+    gp_comm_stats.Begin_frame();
 
     entieties_speed.clear();
 
@@ -311,10 +311,10 @@ void ovum::Speed_evo_behavior_manager::Update_graph()
 
     for(auto [speed, amount] : entieties_speed)
     {
-        gp_comm->Stage_data({speed, amount});
+        gp_comm_stats.Stage_data({speed, amount});
     }
 
-    gp_comm->End_frame();
+    gp_comm_stats.End_frame();
 }
 
 void ovum::Speed_evo_behavior_manager::React_to_event(const eruptor::event::Event & event)
