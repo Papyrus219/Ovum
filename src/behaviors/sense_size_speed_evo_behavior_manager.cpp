@@ -84,6 +84,8 @@ void Sense_size_speed_evo_behavior_manager::New_day()
                 entieties[new_id].speed += (*evolution_distributor)(*generator);
                 entieties[new_id].size = entieties[i].size;
                 entieties[new_id].size += (size_evolution_distributor)(*generator);
+                entieties[new_id].sense = entieties[i].sense;
+                entieties[new_id].sense = (*evolution_distributor)(*generator);
                 entieties[new_id].ai_data = entieties[i].ai_data;
                 entieties[new_id].ai_data.state = Ai_state::HUNTING;
                 entieties[new_id].energy = 40;
@@ -93,7 +95,12 @@ void Sense_size_speed_evo_behavior_manager::New_day()
 
                 render_objects[ entieties[new_id].render_object_id ] = render_objects[ entieties[i].render_object_id ];
                 render_objects[ entieties[new_id].render_object_id ].Set_scale( {(2 * entieties[new_id].size) + 4, (2 * entieties[new_id].size) + 4, (2 * entieties[new_id].size) + 4} );
+                auto & sense_hitbox = app->physic_manager->Get_hitbox_data(1, entieties[new_id].render_object_id);
+                auto orginal_scale = render_objects[ entieties[new_id].render_object_id ].Get_scale();
+                auto new_sense = entieties[new_id].sense;
+                sense_hitbox.Set_individual_scale( {orginal_scale.x + new_sense, orginal_scale.y + new_sense, orginal_scale.z + new_sense } );
             }
+
             entieties[i].food_eaten = 0;
         }
     }
