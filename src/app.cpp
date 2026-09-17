@@ -32,6 +32,8 @@ void ovum::App::Init()
         entity.ai_data.curr_y_rot = glm::eulerAngles( main_scene.render_objects[ entity.render_object_id ].Get_rotation() ).y;
     }
 
+    simulation_parser.Init( *physic_manager );
+
     editor_state.Init( *this );
     simulation_state.Init( *this );
 

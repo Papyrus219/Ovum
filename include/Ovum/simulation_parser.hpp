@@ -7,12 +7,18 @@
 #include <cstdint>
 #include <Ovum/simulation_scene.hpp>
 
+namespace eruptor::physic
+{
+    class Physic_manager;
+}
+
 namespace ovum
 {
 
 class Simulation_parser
 {
 public:
+    void Init(eruptor::physic::Physic_manager & physic_manager);
     std::expected<Simulation_scene, std::string_view> Load_simulation_data_into_scene(const std::filesystem::path & path, eruptor::scene::Scene & base_scene);
 
 private:
@@ -44,6 +50,8 @@ private:
 
     static const std::string error_file_load;
     static const std::string error_text_parsing;
+
+    eruptor::physic::Physic_manager * physic_manager{};
 };
 
 }

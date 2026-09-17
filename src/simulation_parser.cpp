@@ -1,4 +1,5 @@
 #include <Ovum/simulation_parser.hpp>
+#include <Eruptor/physic_manager.hpp>
 #include <iostream>
 #include <fstream>
 #include <print>
@@ -11,6 +12,11 @@ constexpr bool Debug_mode = false;
 
 const std::string ovum::Simulation_parser::error_file_load{"Simulation parser: Failed to load file!"};
 const std::string ovum::Simulation_parser::error_text_parsing{"Simulation parser: Failed to parse text correctly!"};
+
+void ovum::Simulation_parser::Init(eruptor::physic::Physic_manager & physic_manager)
+{
+    this->physic_manager = &physic_manager;
+}
 
 std::expected<ovum::Simulation_scene, std::string_view> ovum::Simulation_parser::Load_simulation_data_into_scene(const std::filesystem::path & path, eruptor::scene::Scene & base_scene)
 {
@@ -280,6 +286,13 @@ void ovum::Simulation_parser::Parse_line(std::string_view line, Simulation_scene
             }
 
             scene.entieties.push_back( current_parsed_entity_data );
+            physic_manager->Add_hitbox(1, scene.entieties.back().render_object_id, scene);
+            auto & sense_hitbox = physic_manager->Get_hitbox_data(1, scene.entieties.back().render_object_id);
+            auto scale = scene.render_objects[ scene.entieties.back().render_object_id ].Get_scale();
+            auto sense = scene.entieties.back().sense;
+            sense_hitbox.Set_individual_scale( {scale.x + sense, scale.y + sense, scale.z + sense } );
+            sense_hitbox.Set_is_active( true );
+
             line_mode = Line_mode::NONE;
             break;
         }
@@ -291,10 +304,3 @@ void ovum::Simulation_parser::Parse_line(std::string_view line, Simulation_scene
             break;
     }
 }
-
-
-
-
-
-
-

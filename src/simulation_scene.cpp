@@ -124,10 +124,9 @@ uint32_t ovum::Simulation_scene::Add_entity()
     if(free_objects.empty())
     {
         physic_manager->Add_hitbox(0, entieties.back().render_object_id, *this);
+        physic_manager->Add_hitbox(1, entieties.back().render_object_id, *this);
     }
 
-
-    physic_manager->Add_hitbox(1, entieties.back().render_object_id, *this);
     auto & sense_hitbox = physic_manager->Get_hitbox_data(1, entieties.back().render_object_id);
     auto scale = render_objects[ entieties.back().render_object_id ].Get_scale();
     auto sense = entieties.back().sense;
