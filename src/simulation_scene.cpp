@@ -127,11 +127,15 @@ uint32_t ovum::Simulation_scene::Add_entity()
         physic_manager->Add_hitbox(1, entieties.back().render_object_id, *this);
     }
 
-    auto & sense_hitbox = physic_manager->Get_hitbox_data(1, entieties.back().render_object_id);
-    auto scale = render_objects[ entieties.back().render_object_id ].Get_scale();
-    auto sense = entieties.back().sense;
-    sense_hitbox.Set_individual_scale( {scale.x + sense, scale.y + sense, scale.z + sense } );
-    sense_hitbox.Set_is_active( true );
+    if(auto sense_hitbox_wraper = physic_manager->Get_hitbox_data(1, entieties.back().render_object_id))
+    {
+        auto & sense_hitbox = sense_hitbox_wraper.value().get();
+
+        auto scale = render_objects[ entieties.back().render_object_id ].Get_scale();
+        auto sense = entieties.back().sense;
+        sense_hitbox.Set_individual_scale( {scale.x + sense, scale.y + sense, scale.z + sense } );
+        sense_hitbox.Set_is_active( true );
+    }
 
     return entieties.size() - 1;
 }
@@ -254,8 +258,10 @@ void ovum::Simulation_scene::Remove_entity(uint32_t render_object_id)
     free_objects.push( render_object_id );
     render_objects[ render_object_id ].is_active = false;
 
-    auto & sense_hitbox = physic_manager->Get_hitbox_data(1, render_object_id);
-    sense_hitbox.Set_is_active( false );
+    if(auto sense_hitbox = physic_manager->Get_hitbox_data(1, render_object_id))
+    {
+        sense_hitbox.value().get().Set_is_active( false );
+    }
 
     entieties.erase( it );
 }

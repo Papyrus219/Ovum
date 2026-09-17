@@ -95,14 +95,20 @@ void Sense_size_speed_evo_behavior_manager::New_day()
 
                 render_objects[ entieties[new_id].render_object_id ] = render_objects[ entieties[i].render_object_id ];
                 render_objects[ entieties[new_id].render_object_id ].Set_scale( {(2 * entieties[new_id].size) + 4, (2 * entieties[new_id].size) + 4, (2 * entieties[new_id].size) + 4} );
-                auto & sense_hitbox = app->physic_manager->Get_hitbox_data(1, entieties[new_id].render_object_id);
-                auto orginal_scale = render_objects[ entieties[new_id].render_object_id ].Get_scale();
-                auto new_sense = entieties[new_id].sense;
-                sense_hitbox.Set_individual_scale( {orginal_scale.x + new_sense, orginal_scale.y + new_sense, orginal_scale.z + new_sense } );
+
+                if(auto sense_hitbox_wraper = app->physic_manager->Get_hitbox_data(1, entieties[new_id].render_object_id))
+                {
+                    auto sense_hitbox = sense_hitbox_wraper.value().get();
+
+                    auto orginal_scale = render_objects[ entieties[new_id].render_object_id ].Get_scale();
+                    auto new_sense = entieties[new_id].sense;
+                    sense_hitbox.Set_individual_scale( {orginal_scale.x + new_sense, orginal_scale.y + new_sense, orginal_scale.z + new_sense } );
+                }
             }
 
             entieties[i].food_eaten = 0;
         }
+
     }
 
     Update_graph();

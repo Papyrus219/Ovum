@@ -49,10 +49,13 @@ void ovum::App::Init()
     if(floor_it != main_scene.objects_aliases.end())
     {
         std::println(std::clog, "FLOOR ID: {}", floor_it->second);
-        auto floor_aabb = physic_manager->Get_hitbox_data(0, floor_it->second ).Get_aabb(main_scene);//main_scene.render_objects[ floor_it->second ].Get_aabb();
+        if(auto floor = physic_manager->Get_hitbox_data(0, floor_it->second ))
+        {
+            auto & floor_aabb = floor.value().get().Get_aabb(main_scene);
 
-        world_min = floor_aabb.min;
-        world_max = floor_aabb.max;
+            world_min = floor_aabb.min;
+            world_max = floor_aabb.max;
+        }
 
         std::println(std::clog, "Find world boundries: min: {} {} {} max: {} {} {}", world_min.x, world_min.y, world_min.z, world_max.x, world_max.y, world_max.z);
     }

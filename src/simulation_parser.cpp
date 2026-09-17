@@ -287,11 +287,14 @@ void ovum::Simulation_parser::Parse_line(std::string_view line, Simulation_scene
 
             scene.entieties.push_back( current_parsed_entity_data );
             physic_manager->Add_hitbox(1, scene.entieties.back().render_object_id, scene);
-            auto & sense_hitbox = physic_manager->Get_hitbox_data(1, scene.entieties.back().render_object_id);
-            auto scale = scene.render_objects[ scene.entieties.back().render_object_id ].Get_scale();
-            auto sense = scene.entieties.back().sense;
-            sense_hitbox.Set_individual_scale( {scale.x + sense, scale.y + sense, scale.z + sense } );
-            sense_hitbox.Set_is_active( true );
+            if(auto sense_hitbox_wraper = physic_manager->Get_hitbox_data(1, scene.entieties.back().render_object_id))
+            {
+                auto & sense_hitbox = sense_hitbox_wraper.value().get();
+                auto scale = scene.render_objects[ scene.entieties.back().render_object_id ].Get_scale();
+                auto sense = scene.entieties.back().sense;
+                sense_hitbox.Set_individual_scale( {scale.x + sense, scale.y + sense, scale.z + sense } );
+                sense_hitbox.Set_is_active( true );
+            }
 
             line_mode = Line_mode::NONE;
             break;
