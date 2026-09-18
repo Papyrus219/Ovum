@@ -12,15 +12,19 @@
 namespace ovum
 {
 
+class Simulation_scene;
+
 struct Entiety_data
 {
     void Reset();
     void Eat();
 
+    void Rotate_to_intrest(Simulation_scene & sim_scene, float delta_time);
+
     Ai_data ai_data{};
     float speed{};
     float size{1};
-    float sense{5};
+    float sense{10};
     float energy{40};
 
     uint32_t render_object_id{};

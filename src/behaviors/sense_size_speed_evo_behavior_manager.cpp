@@ -58,7 +58,9 @@ void Sense_size_speed_evo_behavior_manager::New_day()
         main_scene->Remove_food( main_scene->food.back().render_object_id );
     }
 
-    Spawn_food(100);
+    ///@todo Polish ai.
+
+    Spawn_food(40);
 
     auto & entieties = main_scene->entieties;
     auto & render_objects = main_scene->render_objects;
@@ -85,13 +87,14 @@ void Sense_size_speed_evo_behavior_manager::New_day()
                 entieties[new_id].size = entieties[i].size;
                 entieties[new_id].size += (size_evolution_distributor)(*generator);
                 entieties[new_id].sense = entieties[i].sense;
-                entieties[new_id].sense = (*evolution_distributor)(*generator);
+                entieties[new_id].sense += (*evolution_distributor)(*generator);
                 entieties[new_id].ai_data = entieties[i].ai_data;
                 entieties[new_id].ai_data.state = Ai_state::HUNTING;
                 entieties[new_id].energy = 40;
 
                 if(entieties[new_id].speed < 0.1) entieties[new_id].speed = 0.1;
                 if(entieties[new_id].size < 0.1) entieties[new_id].size = 0.1;
+                if(entieties[new_id].sense < 0.1) entieties[new_id].sense = 0.1;
 
                 render_objects[ entieties[new_id].render_object_id ] = render_objects[ entieties[i].render_object_id ];
                 render_objects[ entieties[new_id].render_object_id ].Set_scale( {(2 * entieties[new_id].size) + 4, (2 * entieties[new_id].size) + 4, (2 * entieties[new_id].size) + 4} );
@@ -108,7 +111,6 @@ void Sense_size_speed_evo_behavior_manager::New_day()
 
             entieties[i].food_eaten = 0;
         }
-
     }
 
     Update_graph();
@@ -150,45 +152,47 @@ void ovum::Sense_size_speed_evo_behavior_manager::Update_hunting(eruptor::scene:
         entity_data.ai_data.is_desire_rot = false;
     }
 
-    if(entity_data.ai_data.is_desire_rot)
-    {
-        entity_data.ai_data.time_elapsed += delta_time;
+    // if(entity_data.ai_data.is_desire_rot)
+    // {
+    //     entity_data.ai_data.time_elapsed += delta_time;
+    //
+    //     if(entity_data.ai_data.time_elapsed >= 1.0)
+    //     {
+    //         entity_data.ai_data.is_desire_rot = false;
+    //
+    //         entity_data.ai_data.desire_y_rot = entity_data.ai_data.curr_y_rot
+    //         + (*rotation_distributor)(*generator) * ((*decision_distributor)(*generator) ? 1.0f : -1.0f);
+    //
+    //         entity_data.ai_data.desire_y_rot = sim_state->Normilize_angle(entity_data.ai_data.desire_y_rot);
+    //
+    //         entity_data.ai_data.time_elapsed = 0;
+    //     }
+    // }
+    // else
+    // {
+    //     float diff = sim_state->Normilize_angle( entity_data.ai_data.desire_y_rot - entity_data.ai_data.curr_y_rot );
+    //     if(std::abs(diff) > 0.05f)
+    //     {
+    //         float step = std::copysign( std::max(1.0f, entity_data.speed) * delta_time, diff);
+    //         if(std::abs(step) > std::abs(diff))
+    //         {
+    //             step = diff;
+    //         }
+    //
+    //         render_object.Rotate({0.0f, step, 0.0f});
+    //         entity_data.ai_data.curr_y_rot = sim_state->Normilize_angle(entity_data.ai_data.curr_y_rot + step);
+    //     }
+    //     else
+    //     {
+    //         entity_data.ai_data.is_desire_rot = true;
+    //     }
+    // }
 
-        if(entity_data.ai_data.time_elapsed >= 1.0)
-        {
-            entity_data.ai_data.is_desire_rot = false;
-
-            entity_data.ai_data.desire_y_rot = entity_data.ai_data.curr_y_rot
-            + (*rotation_distributor)(*generator) * ((*decision_distributor)(*generator) ? 1.0f : -1.0f);
-
-            entity_data.ai_data.desire_y_rot = sim_state->Normilize_angle(entity_data.ai_data.desire_y_rot);
-
-            entity_data.ai_data.time_elapsed = 0;
-        }
-    }
-    else
-    {
-        float diff = sim_state->Normilize_angle( entity_data.ai_data.desire_y_rot - entity_data.ai_data.curr_y_rot );
-        if(std::abs(diff) > 0.05f)
-        {
-            float step = std::copysign( std::max(1.0f, entity_data.speed) * delta_time, diff);
-            if(std::abs(step) > std::abs(diff))
-            {
-                step = diff;
-            }
-
-            render_object.Rotate({0.0f, step, 0.0f});
-            entity_data.ai_data.curr_y_rot = sim_state->Normilize_angle(entity_data.ai_data.curr_y_rot + step);
-        }
-        else
-        {
-            entity_data.ai_data.is_desire_rot = true;
-        }
-    }
+    entity_data.Rotate_to_intrest(sim_state->app->main_scene, delta_time);
 
     glm::vec3 forward  = render_object.Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f} ;
     render_object.Move( forward * entity_data.speed * delta_time );
-    entity_data.energy -= (entity_data.size * entity_data.size * entity_data.size) * (entity_data.speed * entity_data.speed) * delta_time;
+    entity_data.energy -= (entity_data.size * entity_data.size * entity_data.size) * entity_data.speed * delta_time;
 
     if(entity_data.energy < 5 && entity_data.food_eaten > 0)
     {
@@ -279,7 +283,7 @@ void ovum::Sense_size_speed_evo_behavior_manager::Update_return(eruptor::scene::
 
     glm::vec3 forward = render_object.Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f};
     render_object.Move( forward * entity_data.speed * delta_time );
-    entity_data.energy -= ( entity_data.size * entity_data.size * entity_data.size) * (entity_data.speed * entity_data.speed) * delta_time;
+    entity_data.energy -= ( entity_data.size * entity_data.size * entity_data.size) * delta_time;
 
     float wall_margin{0.3f};
 
@@ -366,14 +370,69 @@ void Sense_size_speed_evo_behavior_manager::React_to_event(const eruptor::event:
                     std::println(std::clog, "KANIBALIZM!");
                     entity_a.Eat();
 
-                    main_scene->Remove_entity( entity_b.render_object_id );
+                    app->main_scene.Remove_entity( entity_b.render_object_id );
+                    /*
+                    dead_ids.push_back(entity_b.render_object_id);
+                    entity_b.ai_data.state = Ai_state::DEAD;
+                    finished_entities++;*/
                 }
                 else if(entity_b.size >= (1.30 * entity_a.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
                 {
                     std::println(std::clog, "KANIBALIZM!");
                     entity_b.Eat();
 
-                    main_scene->Remove_entity( entity_a.render_object_id );
+                    app->main_scene.Remove_entity( entity_a.render_object_id );
+                    /*
+                    dead_ids.push_back(entity_a.render_object_id);
+                    entity_a.ai_data.state = Ai_state::DEAD;
+                    finished_entities++;*/
+                }
+            }
+        }
+        else if((colision->object_a_layer | colision->object_b_layer) == 1 && (colision->object_a_layer & colision->object_b_layer) == 0 )
+        {
+            if(colision->object_a_layer == 1)
+            {
+                if(auto entity_a_wraper = app->main_scene.Get_if_is_entiety(colision->object_a_id))
+                {
+                    auto & entity_a = entity_a_wraper.value().get();
+                    if(entity_a.ai_data.state != Ai_state::HUNTING) return;
+
+                    if(app->main_scene.Get_if_is_food(colision->object_b_id))
+                    {
+                        entity_a.ai_data.Add_dirr_of_intrest(app->main_scene.render_objects[colision->object_a_id].Get_position(), app->main_scene.render_objects[colision->object_b_id].Get_position(), 1, 2);
+                    }
+                    else if(auto entity_b_wraper = app->main_scene.Get_if_is_entiety(colision->object_b_id))
+                    {
+                        auto & entity_b = entity_b_wraper.value().get();
+
+                        if(entity_b.size >= (1.30 * entity_a.size))
+                        {
+                            entity_a.ai_data.Add_dirr_of_intrest(app->main_scene.render_objects[colision->object_b_id].Get_position(), app->main_scene.render_objects[colision->object_a_id].Get_position(), 100, 2);
+                        }
+                    }
+                }
+            }
+            else if(colision->object_b_layer == 1)
+            {
+                if(auto entity_b_wraper = app->main_scene.Get_if_is_entiety(colision->object_b_id))
+                {
+                    auto & entity_b = entity_b_wraper.value().get();
+                    if(entity_b.ai_data.state != Ai_state::HUNTING) return;
+
+                    if(app->main_scene.Get_if_is_food(colision->object_a_id))
+                    {
+                        entity_b.ai_data.Add_dirr_of_intrest(app->main_scene.render_objects[colision->object_b_id].Get_position(), app->main_scene.render_objects[colision->object_a_id].Get_position(), 1, 2);
+                    }
+                    else if(auto entity_a_wraper = app->main_scene.Get_if_is_entiety(colision->object_a_id))
+                    {
+                        auto & entity_a = entity_a_wraper.value().get();
+
+                        if(entity_a.size >= (1.30 * entity_b.size))
+                        {
+                            entity_b.ai_data.Add_dirr_of_intrest(app->main_scene.render_objects[colision->object_a_id].Get_position(), app->main_scene.render_objects[colision->object_b_id].Get_position(), 100, 2);
+                        }
+                    }
                 }
             }
         }

@@ -1,7 +1,9 @@
 #include <Ovum/ai_state.hpp>
+#include <iostream>
 
 void ovum::Ai_data::Add_dirr_of_intrest(glm::vec3 from, glm::vec3 to, float value, float fallback)
 {
+    std::clog << "OOOOOOO!\n";
     glm::vec3 delta = to - from;
     delta.y = 0;
 

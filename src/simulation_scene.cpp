@@ -393,3 +393,27 @@ void ovum::Entiety_data::Eat()
     }
 }
 
+void ovum::Entiety_data::Rotate_to_intrest(Simulation_scene & sim_scene, float delta_time)
+{
+    ai_data.desire_dirr = glm::normalize( ai_data.desire_dirr );
+
+    float desire_y_rot = std::atan2(-ai_data.desire_dirr.z, ai_data.desire_dirr.x);
+    ai_data.desire_y_rot = desire_y_rot;
+
+    float diff = std::atan2(std::sin((desire_y_rot - ai_data.curr_y_rot)), std::cos((desire_y_rot - ai_data.curr_y_rot)));
+
+    if(std::abs(diff) > 0.05f)
+    {
+        float step = std::copysign(speed * delta_time, diff);
+
+        if(std::abs(step) > std::abs(diff))
+        {
+            step = diff;
+        }
+
+        sim_scene.render_objects[render_object_id].Rotate( {0.0f, step, 0.0f} );
+        ai_data.curr_y_rot = std::atan2(std::sin(ai_data.curr_y_rot + step), std::cos(ai_data.curr_y_rot + step));
+    }
+
+    ai_data.desire_dirr = {0, 0, 0};
+}
