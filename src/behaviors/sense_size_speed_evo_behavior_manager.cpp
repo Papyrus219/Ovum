@@ -10,12 +10,13 @@ using namespace ovum;
 
 void Sense_size_speed_evo_behavior_manager::Setup()
 {
-    gp_comm_stats.Enable_2d_bars("SPEED");
+    gp_comm_stats.Enable_3d_points("STATS", 2);
     gp_comm_stats.Set_x_axis_title("Speed");
-    gp_comm_stats.Set_y_axis_title("Entities count");
-    //gp_comm->Set_z_axis_title("Size");
-    gp_comm_stats.Set_x_axis_range(0.0, 30.0);
-    gp_comm_stats.Set_y_axis_range(0, 10);
+    gp_comm_stats.Set_y_axis_title("Size");
+    gp_comm_stats.Set_z_axis_title("Sense");
+    gp_comm_stats.Set_x_axis_range(0.0, 50.0);
+    gp_comm_stats.Set_y_axis_range(0, 50);
+    gp_comm_stats.Set_z_axis_range(0, 50);
 }
 
 void Sense_size_speed_evo_behavior_manager::Update_ai(float delta_time)
@@ -58,9 +59,7 @@ void Sense_size_speed_evo_behavior_manager::New_day()
         main_scene->Remove_food( main_scene->food.back().render_object_id );
     }
 
-    ///@todo Polish ai.
-
-    Spawn_food(40);
+    Spawn_food(100);
 
     auto & entieties = main_scene->entieties;
     auto & render_objects = main_scene->render_objects;
@@ -75,7 +74,7 @@ void Sense_size_speed_evo_behavior_manager::New_day()
     {
         if(entieties[i].ai_data.state == Ai_state::RESTING)
         {
-            entieties[i].energy = 40;
+            entieties[i].energy = 500;
             entieties[i].ai_data.state = Ai_state::HUNTING;
             entieties[i].ai_data.time_elapsed = 0;
 
@@ -90,7 +89,7 @@ void Sense_size_speed_evo_behavior_manager::New_day()
                 entieties[new_id].sense += (*evolution_distributor)(*generator);
                 entieties[new_id].ai_data = entieties[i].ai_data;
                 entieties[new_id].ai_data.state = Ai_state::HUNTING;
-                entieties[new_id].energy = 40;
+                entieties[new_id].energy = 500;
 
                 if(entieties[new_id].speed < 0.1) entieties[new_id].speed = 0.1;
                 if(entieties[new_id].size < 0.1) entieties[new_id].size = 0.1;
@@ -101,7 +100,7 @@ void Sense_size_speed_evo_behavior_manager::New_day()
 
                 if(auto sense_hitbox_wraper = app->physic_manager->Get_hitbox_data(1, entieties[new_id].render_object_id))
                 {
-                    auto sense_hitbox = sense_hitbox_wraper.value().get();
+                    auto & sense_hitbox = sense_hitbox_wraper.value().get();
 
                     auto orginal_scale = render_objects[ entieties[new_id].render_object_id ].Get_scale();
                     auto new_sense = entieties[new_id].sense;
@@ -152,47 +151,51 @@ void ovum::Sense_size_speed_evo_behavior_manager::Update_hunting(eruptor::scene:
         entity_data.ai_data.is_desire_rot = false;
     }
 
-    // if(entity_data.ai_data.is_desire_rot)
-    // {
-    //     entity_data.ai_data.time_elapsed += delta_time;
-    //
-    //     if(entity_data.ai_data.time_elapsed >= 1.0)
-    //     {
-    //         entity_data.ai_data.is_desire_rot = false;
-    //
-    //         entity_data.ai_data.desire_y_rot = entity_data.ai_data.curr_y_rot
-    //         + (*rotation_distributor)(*generator) * ((*decision_distributor)(*generator) ? 1.0f : -1.0f);
-    //
-    //         entity_data.ai_data.desire_y_rot = sim_state->Normilize_angle(entity_data.ai_data.desire_y_rot);
-    //
-    //         entity_data.ai_data.time_elapsed = 0;
-    //     }
-    // }
-    // else
-    // {
-    //     float diff = sim_state->Normilize_angle( entity_data.ai_data.desire_y_rot - entity_data.ai_data.curr_y_rot );
-    //     if(std::abs(diff) > 0.05f)
-    //     {
-    //         float step = std::copysign( std::max(1.0f, entity_data.speed) * delta_time, diff);
-    //         if(std::abs(step) > std::abs(diff))
-    //         {
-    //             step = diff;
-    //         }
-    //
-    //         render_object.Rotate({0.0f, step, 0.0f});
-    //         entity_data.ai_data.curr_y_rot = sim_state->Normilize_angle(entity_data.ai_data.curr_y_rot + step);
-    //     }
-    //     else
-    //     {
-    //         entity_data.ai_data.is_desire_rot = true;
-    //     }
-    // }
+    if(entity_data.ai_data.desire_dirr != glm::vec3{0.0, 0.0, 0.0})
+    {
+        entity_data.Rotate_to_intrest(sim_state->app->main_scene, delta_time);
+    }
+    else
+    {
+        if(entity_data.ai_data.is_desire_rot)
+        {
+            entity_data.ai_data.time_elapsed += delta_time;
 
-    entity_data.Rotate_to_intrest(sim_state->app->main_scene, delta_time);
+            if(entity_data.ai_data.time_elapsed >= 5.0)
+            {
+                entity_data.ai_data.is_desire_rot = false;
+
+                entity_data.ai_data.desire_y_rot = entity_data.ai_data.curr_y_rot + (*rotation_distributor)(*generator) * ((*decision_distributor)(*generator) ? 1.0f : -1.0f);
+
+                entity_data.ai_data.desire_y_rot = sim_state->Normilize_angle(entity_data.ai_data.desire_y_rot);
+
+                entity_data.ai_data.time_elapsed = 0;
+            }
+        }
+        else
+        {
+            float diff = sim_state->Normilize_angle( entity_data.ai_data.desire_y_rot - entity_data.ai_data.curr_y_rot );
+            if(std::abs(diff) > 0.05f)
+            {
+                float step = std::copysign( std::max(1.0f, entity_data.speed) * delta_time, diff);
+                if(std::abs(step) > std::abs(diff))
+                {
+                    step = diff;
+                }
+
+                render_object.Rotate({0.0f, step, 0.0f});
+                entity_data.ai_data.curr_y_rot = sim_state->Normilize_angle(entity_data.ai_data.curr_y_rot + step);
+            }
+            else
+            {
+                entity_data.ai_data.is_desire_rot = true;
+            }
+        }
+    }
 
     glm::vec3 forward  = render_object.Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f} ;
     render_object.Move( forward * entity_data.speed * delta_time );
-    entity_data.energy -= (entity_data.size * entity_data.size * entity_data.size) * entity_data.speed * delta_time;
+    entity_data.energy -= (((entity_data.size * entity_data.size * entity_data.size) * (entity_data.speed * entity_data.speed)) + entity_data.sense) * delta_time;
 
     if(entity_data.energy < 5 && entity_data.food_eaten > 0)
     {
@@ -283,7 +286,7 @@ void ovum::Sense_size_speed_evo_behavior_manager::Update_return(eruptor::scene::
 
     glm::vec3 forward = render_object.Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f};
     render_object.Move( forward * entity_data.speed * delta_time );
-    entity_data.energy -= ( entity_data.size * entity_data.size * entity_data.size) * delta_time;
+    entity_data.energy -= (((entity_data.size * entity_data.size * entity_data.size) * (entity_data.speed * entity_data.speed)) + entity_data.sense) * delta_time;
 
     float wall_margin{0.3f};
 
@@ -324,17 +327,22 @@ void Sense_size_speed_evo_behavior_manager::Update_graph()
 {
     gp_comm_stats.Begin_frame();
 
-    entieties_speed.clear();
+    entieties_stats.clear();
+
+    auto round_1 = [](float value)
+    {
+        return std::round(value * 10.0f) / 10.0f;
+    };
 
     for(auto & entity : main_scene->entieties)
     {
-        float bucket = std::round(entity.speed * 10.0f) / 10.0f;
-        entieties_speed[bucket]++;
+        entieties_stats[{ round_1(entity.speed), round_1(entity.size), round_1(entity.sense) }]++;
     }
 
-    for(auto [speed, amount] : entieties_speed)
+    for(auto & [key, amount] : entieties_stats)
     {
-        gp_comm_stats.Stage_data({speed, amount});
+        auto [speed, size, sense] = key;
+        gp_comm_stats.Stage_data({speed, size, sense});
     }
 
     gp_comm_stats.End_frame();
@@ -367,25 +375,15 @@ void Sense_size_speed_evo_behavior_manager::React_to_event(const eruptor::event:
 
                 if(entity_a.size >= (1.30 * entity_b.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
                 {
-                    std::println(std::clog, "KANIBALIZM!");
                     entity_a.Eat();
 
                     app->main_scene.Remove_entity( entity_b.render_object_id );
-                    /*
-                    dead_ids.push_back(entity_b.render_object_id);
-                    entity_b.ai_data.state = Ai_state::DEAD;
-                    finished_entities++;*/
                 }
                 else if(entity_b.size >= (1.30 * entity_a.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
                 {
-                    std::println(std::clog, "KANIBALIZM!");
                     entity_b.Eat();
 
                     app->main_scene.Remove_entity( entity_a.render_object_id );
-                    /*
-                    dead_ids.push_back(entity_a.render_object_id);
-                    entity_a.ai_data.state = Ai_state::DEAD;
-                    finished_entities++;*/
                 }
             }
         }
@@ -406,7 +404,11 @@ void Sense_size_speed_evo_behavior_manager::React_to_event(const eruptor::event:
                     {
                         auto & entity_b = entity_b_wraper.value().get();
 
-                        if(entity_b.size >= (1.30 * entity_a.size))
+                        if(entity_b.size <= (1.30 * entity_a.size))
+                        {
+                            entity_a.ai_data.Add_dirr_of_intrest(app->main_scene.render_objects[colision->object_a_id].Get_position(), app->main_scene.render_objects[colision->object_b_id].Get_position(), 1, 2);
+                        }
+                        else if(entity_b.size >= (1.30 * entity_a.size))
                         {
                             entity_a.ai_data.Add_dirr_of_intrest(app->main_scene.render_objects[colision->object_b_id].Get_position(), app->main_scene.render_objects[colision->object_a_id].Get_position(), 100, 2);
                         }
@@ -428,7 +430,11 @@ void Sense_size_speed_evo_behavior_manager::React_to_event(const eruptor::event:
                     {
                         auto & entity_a = entity_a_wraper.value().get();
 
-                        if(entity_a.size >= (1.30 * entity_b.size))
+                        if(entity_a.size <= (1.30 * entity_b.size))
+                        {
+                            entity_b.ai_data.Add_dirr_of_intrest(app->main_scene.render_objects[colision->object_b_id].Get_position(), app->main_scene.render_objects[colision->object_a_id].Get_position(), 1, 2);
+                        }
+                        else if(entity_a.size >= (1.30 * entity_b.size))
                         {
                             entity_b.ai_data.Add_dirr_of_intrest(app->main_scene.render_objects[colision->object_a_id].Get_position(), app->main_scene.render_objects[colision->object_b_id].Get_position(), 100, 2);
                         }

@@ -50,6 +50,8 @@ void ovum::Simulation_state::Enter_state()
     }
 
     last_time = app->app_clock.now();
+    Update_graph();
+    behavior_manager->Update_graph();
 }
 
 void ovum::Simulation_state::Update()

@@ -27,7 +27,7 @@ public:
 
     void Enable_2d_points(const std::string & title);
     void Enable_2d_bars(const std::string & title, bool enable_floting_points = true);
-    void Enable_3d_points(const std::string & title);
+    void Enable_3d_points(const std::string & title, uint32_t size = 1);
 
     void Set_title(const std::string & title);
 

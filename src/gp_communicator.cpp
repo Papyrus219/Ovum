@@ -68,9 +68,15 @@ void ovum::GP_communicator::Enable_2d_bars(const std::string& title, bool enable
     mode = GP_mode::Mode_2D_BARS;
 }
 
-void ovum::GP_communicator::Enable_3d_points(const std::string & title)
+void ovum::GP_communicator::Enable_3d_points(const std::string & title, uint32_t size)
 {
     fprintf(gnuplot, "set title '%s'\n",  title.c_str());
+    fprintf(gnuplot, "set pointsize %u \n", size);
+
+    fprintf(gnuplot, "set grid xtics ytics ztics\n");
+    fprintf(gnuplot, "set xyplane at 0\n");
+    fprintf(gnuplot, "set border 4095\n");
+    fprintf(gnuplot, "set view 60,30\n");
 
     mode = GP_mode::MODE_3D_POINT;
 }

@@ -25,7 +25,7 @@ struct Entiety_data
     float speed{};
     float size{1};
     float sense{10};
-    float energy{40};
+    float energy{500};
 
     uint32_t render_object_id{};
 

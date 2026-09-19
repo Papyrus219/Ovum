@@ -4,6 +4,8 @@
 #include <Ovum/behaviors/entity_behavior_manager.hpp>
 #include <Ovum/simulation_scene.hpp>
 #include <Eruptor/scene/scene.hpp>
+#include <map>
+#include <tuple>
 
 namespace ovum
 {
@@ -25,7 +27,7 @@ private:
     void Update_hunting(eruptor::scene::Render_object & render_object, Entiety_data & entity_data, float delta_time);
     void Update_return(eruptor::scene::Render_object & render_object, Entiety_data & entity_data, float delta_time);
 
-    std::unordered_map<float, uint32_t> entieties_speed{};
+    std::map<std::tuple<float, float, float>, int> entieties_stats;
     std::uniform_real_distribution<float> size_evolution_distributor{-0.29, 0.29};
 };
 
