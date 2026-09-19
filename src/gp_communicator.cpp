@@ -116,6 +116,21 @@ void ovum::GP_communicator::Set_z_axis_title(const std::string & title)
     fprintf(gnuplot, "set zlabel '%s'\n", title.c_str());
 }
 
+void ovum::GP_communicator::Set_x_tics(float step)
+{
+    fprintf(gnuplot, "set xtics %f\n", step);
+}
+
+void ovum::GP_communicator::Set_y_tics(float step)
+{
+    fprintf(gnuplot, "set ytics %f\n", step);
+}
+
+void ovum::GP_communicator::Set_z_tics(float step)
+{
+    fprintf(gnuplot, "set ztics %f\n", step);
+}
+
 void ovum::GP_communicator::Stage_data(glm::vec3 vec3)
 {
     fprintf(gnuplot, "%f %f %f\n", vec3.x, vec3.y, vec3.z);

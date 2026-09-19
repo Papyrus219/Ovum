@@ -14,9 +14,13 @@ void Sense_size_speed_evo_behavior_manager::Setup()
     gp_comm_stats.Set_x_axis_title("Speed");
     gp_comm_stats.Set_y_axis_title("Size");
     gp_comm_stats.Set_z_axis_title("Sense");
-    gp_comm_stats.Set_x_axis_range(0.0, 50.0);
-    gp_comm_stats.Set_y_axis_range(0, 50);
-    gp_comm_stats.Set_z_axis_range(0, 50);
+    gp_comm_stats.Set_x_axis_range(0.0, 15);
+    gp_comm_stats.Set_y_axis_range(0, 15);
+    gp_comm_stats.Set_z_axis_range(0, 15);
+
+    gp_comm_stats.Set_x_tics(2);
+    gp_comm_stats.Set_y_tics(2);
+    gp_comm_stats.Set_z_tics(2);
 }
 
 void Sense_size_speed_evo_behavior_manager::Update_ai(float delta_time)

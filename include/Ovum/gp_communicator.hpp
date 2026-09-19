@@ -39,6 +39,10 @@ public:
     void Set_y_axis_title(const std::string & title);
     void Set_z_axis_title(const std::string & title);
 
+    void Set_x_tics(float step);
+    void Set_y_tics(float step);
+    void Set_z_tics(float step);
+
     void Stage_data(glm::vec3 vec3);
     void Stage_data(glm::vec2 vec2);
     void Stage_data(float x);
