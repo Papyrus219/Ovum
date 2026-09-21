@@ -396,6 +396,7 @@ void ovum::Entiety_data::Eat()
 void ovum::Entiety_data::Rotate_to_intrest(Simulation_scene & sim_scene, float delta_time)
 {
     ai_data.desire_dirr = glm::normalize( ai_data.desire_dirr );
+    ai_data.is_desire_rot = false;
 
     float desire_y_rot = std::atan2(-ai_data.desire_dirr.z, ai_data.desire_dirr.x);
     ai_data.desire_y_rot = desire_y_rot;

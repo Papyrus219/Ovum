@@ -165,7 +165,7 @@ void ovum::Sense_size_speed_evo_behavior_manager::Update_hunting(eruptor::scene:
         {
             entity_data.ai_data.time_elapsed += delta_time;
 
-            if(entity_data.ai_data.time_elapsed >= 5.0)
+            if(entity_data.ai_data.time_elapsed >= 1.0)
             {
                 entity_data.ai_data.is_desire_rot = false;
 
