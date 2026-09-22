@@ -8,6 +8,7 @@
 #include <Ovum/behaviors/size_speed_evo_behavior_manager.hpp>
 #include <Ovum/behaviors/sense_size_speed_evo_behavior_manager.hpp>
 #include <Ovum/gp_communicator.hpp>
+#include <Ovum/formula.hpp>
 #include <random>
 
 namespace ovum
@@ -58,6 +59,9 @@ public:
     Sense_size_speed_evo_behavior_manager sense_speed_size_evo_behavior{};
     Survive_behavior_manager survive_behavior;
     Entity_behavior_manager * behavior_manager{};
+
+    Formula formula{};
+    Registry registry{};
 };
 
 }

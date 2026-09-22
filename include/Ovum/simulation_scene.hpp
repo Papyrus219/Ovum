@@ -12,7 +12,7 @@
 namespace ovum
 {
 
-class Simulation_scene;
+struct Simulation_scene;
 
 struct Entiety_data
 {

@@ -162,7 +162,7 @@ void ovum::Formula::Parser::Parse_factor()
         }
         return;
     }
-    if(pos < formula_string.size() && (std::isdigit(static_cast<unsigned char>(formula_string[pos]) || formula_string[pos] == '.')))
+    if(pos < formula_string.size() && (std::isdigit(static_cast<unsigned char>(formula_string[pos])) || formula_string[pos] == '.'))
     {
         size_t used{};
         float value = std::stof(std::string{formula_string.substr(pos)}, &used);
@@ -170,10 +170,10 @@ void ovum::Formula::Parser::Parse_factor()
         formula.Emit({Op::CONST, value});
         return;
     }
-    if(pos < formula_string.size() && (std::isalpha(static_cast<unsigned char>(formula_string[pos]) || formula_string[pos] == '_')))
+    if(pos < formula_string.size() && (std::isalpha(static_cast<unsigned char>(formula_string[pos])) || formula_string[pos] == '_'))
     {
         size_t start = pos;
-        while(pos < formula_string.size() && (std::isalnum(static_cast<unsigned char>(formula_string[pos]) || formula_string[pos] == '_')))
+        while(pos < formula_string.size() && (std::isalnum(static_cast<unsigned char>(formula_string[pos])) || formula_string[pos] == '_'))
         {
             pos++;
         }

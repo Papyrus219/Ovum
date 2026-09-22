@@ -199,7 +199,7 @@ void ovum::Sense_size_speed_evo_behavior_manager::Update_hunting(eruptor::scene:
 
     glm::vec3 forward  = render_object.Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f} ;
     render_object.Move( forward * entity_data.speed * delta_time );
-    entity_data.energy -= (((entity_data.size * entity_data.size * entity_data.size) * (entity_data.speed * entity_data.speed)) + entity_data.sense) * delta_time;
+    entity_data.energy -= sim_state->formula.Evaluate(entity_data) * delta_time;
 
     if(entity_data.energy < 5 && entity_data.food_eaten > 0)
     {
@@ -290,7 +290,7 @@ void ovum::Sense_size_speed_evo_behavior_manager::Update_return(eruptor::scene::
 
     glm::vec3 forward = render_object.Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f};
     render_object.Move( forward * entity_data.speed * delta_time );
-    entity_data.energy -= (((entity_data.size * entity_data.size * entity_data.size) * (entity_data.speed * entity_data.speed)) + entity_data.sense) * delta_time;
+    entity_data.energy -= sim_state->formula.Evaluate(entity_data) * delta_time;
 
     float wall_margin{0.3f};
 

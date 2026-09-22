@@ -39,6 +39,9 @@ void ovum::Simulation_state::Init(App & app)
     speed_evo_behavior.Init( *this );
     survive_behavior.Init( *this );
     Set_entity_behavior(sense_speed_size_evo_behavior);
+
+    registry = Make_registry();
+    formula = Formula::Compile("((size * size * size) * (speed * speed)) + sense", registry);
 }
 
 void ovum::Simulation_state::Enter_state()
