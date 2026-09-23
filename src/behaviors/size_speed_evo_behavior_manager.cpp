@@ -57,7 +57,7 @@ void ovum::Size_speed_evo_behavior_manager::New_day()
         main_scene->Remove_food( main_scene->food.back().render_object_id );
     }
 
-    Spawn_food(100);
+    Spawn_food(sim_state->food_per_day);
 
     auto & entieties = main_scene->entieties;
     auto & render_objects = main_scene->render_objects;
@@ -72,7 +72,7 @@ void ovum::Size_speed_evo_behavior_manager::New_day()
     {
         if(entieties[i].ai_data.state == Ai_state::RESTING)
         {
-            entieties[i].energy = 40;
+            entieties[i].energy = sim_state->start_energy;
             entieties[i].ai_data.state = Ai_state::HUNTING;
             entieties[i].ai_data.time_elapsed = 0;
 
@@ -85,7 +85,7 @@ void ovum::Size_speed_evo_behavior_manager::New_day()
                 entieties[new_id].size += (size_evolution_distributor)(*generator);
                 entieties[new_id].ai_data = entieties[i].ai_data;
                 entieties[new_id].ai_data.state = Ai_state::HUNTING;
-                entieties[new_id].energy = 40;
+                entieties[new_id].energy = sim_state->start_energy;
 
                 if(entieties[new_id].speed < 0.1) entieties[new_id].speed = 0.1;
                 if(entieties[new_id].size < 0.1) entieties[new_id].size = 0.1;
@@ -174,7 +174,7 @@ void ovum::Size_speed_evo_behavior_manager::Update_hunting(eruptor::scene::Rende
 
     glm::vec3 forward  = render_object.Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f} ;
     render_object.Move( forward * entity_data.speed * delta_time );
-    entity_data.energy -= (entity_data.size * entity_data.size * entity_data.size) * (entity_data.speed * entity_data.speed) * delta_time;
+    entity_data.energy -= sim_state->formula.Evaluate(entity_data) * delta_time;
 
     if(entity_data.energy < 5 && entity_data.food_eaten > 0)
     {
@@ -265,7 +265,7 @@ void ovum::Size_speed_evo_behavior_manager::Update_return(eruptor::scene::Render
 
     glm::vec3 forward = render_object.Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f};
     render_object.Move( forward * entity_data.speed * delta_time );
-    entity_data.energy -= ( entity_data.size * entity_data.size * entity_data.size) * (entity_data.speed * entity_data.speed) * delta_time;
+    entity_data.energy -= sim_state->formula.Evaluate(entity_data) * delta_time;
 
     float wall_margin{0.3f};
 

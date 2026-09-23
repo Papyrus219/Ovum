@@ -63,7 +63,7 @@ void Sense_size_speed_evo_behavior_manager::New_day()
         main_scene->Remove_food( main_scene->food.back().render_object_id );
     }
 
-    Spawn_food(100);
+    Spawn_food(sim_state->food_per_day);
 
     auto & entieties = main_scene->entieties;
     auto & render_objects = main_scene->render_objects;
@@ -78,7 +78,7 @@ void Sense_size_speed_evo_behavior_manager::New_day()
     {
         if(entieties[i].ai_data.state == Ai_state::RESTING)
         {
-            entieties[i].energy = 500;
+            entieties[i].energy = sim_state->start_energy;
             entieties[i].ai_data.state = Ai_state::HUNTING;
             entieties[i].ai_data.time_elapsed = 0;
 
@@ -93,7 +93,7 @@ void Sense_size_speed_evo_behavior_manager::New_day()
                 entieties[new_id].sense += (*evolution_distributor)(*generator);
                 entieties[new_id].ai_data = entieties[i].ai_data;
                 entieties[new_id].ai_data.state = Ai_state::HUNTING;
-                entieties[new_id].energy = 500;
+                entieties[new_id].energy = sim_state->start_energy;
 
                 if(entieties[new_id].speed < 0.1) entieties[new_id].speed = 0.1;
                 if(entieties[new_id].size < 0.1) entieties[new_id].size = 0.1;

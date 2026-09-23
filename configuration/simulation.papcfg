@@ -1,0 +1,6 @@
+#Simulation configuration
+
+~Energy formula~ ((size * size * size) * (speed * speed)) + sense
+
+~Start energy~ 500
+~Food per day~ 100

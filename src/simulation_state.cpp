@@ -40,8 +40,17 @@ void ovum::Simulation_state::Init(App & app)
     survive_behavior.Init( *this );
     Set_entity_behavior(sense_speed_size_evo_behavior);
 
-    registry = Make_registry();
-    formula = Formula::Compile("((size * size * size) * (speed * speed)) + sense", registry);
+    auto & parser = app.resources->config_parser;
+    auto config_data = parser.Parse_config_file("../../configuration/simulation.papcfg");
+
+    if(config_data)
+    {
+        registry = Make_registry();
+        formula = Formula::Compile(config_data->at("Energy formula"), registry);
+
+        parser.Convert_string_to_number(config_data->at("Start energy"), start_energy, "Start energy");
+        parser.Convert_string_to_number(config_data->at("Food per day"), food_per_day, "Food per day");
+    }
 }
 
 void ovum::Simulation_state::Enter_state()

@@ -60,6 +60,9 @@ public:
     Survive_behavior_manager survive_behavior;
     Entity_behavior_manager * behavior_manager{};
 
+    uint32_t start_energy{};
+    uint32_t food_per_day{};
+
     Formula formula{};
     Registry registry{};
 };
