@@ -1,6 +1,16 @@
 #Simulation configuration
 
+#Current behavior activated
+#TO DO:
+#Implement bahavior switching system with config and simulation reset (TEST A LOT PLEASE!)
+
+
+
 ~Energy formula~ ((size * size * size) * (speed * speed)) + sense
+
+#Basic stats
 
 ~Start energy~ 500
 ~Food per day~ 100
+~Survive need~ 1
+~Reproduction need~ 1

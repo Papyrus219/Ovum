@@ -44,7 +44,7 @@ void Survive_behavior_manager::New_day()
             entieties[i].ai_data.state = Ai_state::HUNTING;
             entieties[i].ai_data.time_elapsed = 0;
 
-            if(entieties[i].food_eaten >= 2)
+            if(entieties[i].food_eaten >= sim_state->food_reproduction_need)
             {
                 auto new_id = main_scene->Add_entity();
                 entieties[new_id].speed = entieties[i].speed;
@@ -83,26 +83,6 @@ void Survive_behavior_manager::Update_ai(float delta_time)
         day_should_end = false;
     }
 }
-
-void Survive_behavior_manager::React_to_event(const eruptor::event::Event& event)
-{
-    if(auto colision = event.Get_if<eruptor::event::Event::Collision_occurred>())
-    {
-        if(auto entity = main_scene->Get_if_is_entiety( colision->object_b_id ); main_scene->Get_if_is_food( colision->object_a_id ) && entity)
-        {
-            entity.value().get().Eat();
-
-            main_scene->Remove_food( colision->object_a_id );
-        }
-        else if(auto entity = main_scene->Get_if_is_entiety( colision->object_a_id ); entity && main_scene->Get_if_is_food( colision->object_b_id ) )
-        {
-            entity.value().get().Eat();
-
-            main_scene->Remove_food( colision->object_b_id );
-        }
-    }
-}
-
 
 void ovum::Survive_behavior_manager::Update_hunting(eruptor::scene::Render_object & render_object, Entiety_data & entity_data, float delta_time)
 {
@@ -179,7 +159,7 @@ void ovum::Survive_behavior_manager::Update_hunting(eruptor::scene::Render_objec
     render_object.Move( forward * entity_data.speed * delta_time );
     entity_data.energy -= sim_state->formula.Evaluate(entity_data) * delta_time;
 
-    if(entity_data.energy < 5 && entity_data.food_eaten > 0)
+    if(entity_data.energy < 5 && entity_data.food_eaten >= sim_state->food_survive_need)
     {
         entity_data.ai_data.state = Ai_state::RETURN;
     }
@@ -313,6 +293,26 @@ void ovum::Survive_behavior_manager::Update_return(eruptor::scene::Render_object
         if(finished_entities >= main_scene->entieties.size())
         {
             day_should_end = true;
+        }
+    }
+}
+
+
+void Survive_behavior_manager::React_to_event(const eruptor::event::Event& event)
+{
+    if(auto colision = event.Get_if<eruptor::event::Event::Collision_occurred>())
+    {
+        if(auto entity = main_scene->Get_if_is_entiety( colision->object_b_id ); main_scene->Get_if_is_food( colision->object_a_id ) && entity)
+        {
+            entity.value().get().Eat(sim_state->food_reproduction_need);
+
+            main_scene->Remove_food( colision->object_a_id );
+        }
+        else if(auto entity = main_scene->Get_if_is_entiety( colision->object_a_id ); entity && main_scene->Get_if_is_food( colision->object_b_id ) )
+        {
+            entity.value().get().Eat(sim_state->food_reproduction_need);
+
+            main_scene->Remove_food( colision->object_b_id );
         }
     }
 }

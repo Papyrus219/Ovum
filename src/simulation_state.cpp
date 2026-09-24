@@ -50,6 +50,8 @@ void ovum::Simulation_state::Init(App & app)
 
         parser.Convert_string_to_number(config_data->at("Start energy"), start_energy, "Start energy");
         parser.Convert_string_to_number(config_data->at("Food per day"), food_per_day, "Food per day");
+        parser.Convert_string_to_number(config_data->at("Survive need"), food_survive_need, "Survive need");
+        parser.Convert_string_to_number(config_data->at("Reproduction need"), food_reproduction_need, "Reproduction need");
     }
 }
 

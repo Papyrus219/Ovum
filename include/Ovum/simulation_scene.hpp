@@ -17,7 +17,7 @@ struct Simulation_scene;
 struct Entiety_data
 {
     void Reset();
-    void Eat();
+    void Eat(uint32_t reproduction_need = 2);
 
     void Rotate_to_intrest(Simulation_scene & sim_scene, float delta_time);
 

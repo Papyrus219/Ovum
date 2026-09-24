@@ -62,6 +62,8 @@ public:
 
     uint32_t start_energy{};
     uint32_t food_per_day{};
+    uint32_t food_survive_need{};
+    uint32_t food_reproduction_need{};
 
     Formula formula{};
     Registry registry{};
