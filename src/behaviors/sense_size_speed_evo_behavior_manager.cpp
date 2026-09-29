@@ -165,13 +165,19 @@ void ovum::Sense_size_speed_evo_behavior_manager::Update_hunting(eruptor::scene:
         {
             entity_data.ai_data.time_elapsed += delta_time;
 
-            if(entity_data.ai_data.time_elapsed >= 1.0)
+            if(entity_data.ai_data.time_elapsed >= 0.5)
             {
-                entity_data.ai_data.is_desire_rot = false;
+                if((*decision_distributor)(*generator) == 1)
+                {
+                    float angle = (*rotation_distributor)(*generator);
+                    if((*decision_distributor)(*generator) == 1)
+                    {
+                        angle = -angle;
+                    }
 
-                entity_data.ai_data.desire_y_rot = entity_data.ai_data.curr_y_rot + (*rotation_distributor)(*generator) * ((*decision_distributor)(*generator) ? 1.0f : -1.0f);
-
-                entity_data.ai_data.desire_y_rot = sim_state->Normilize_angle(entity_data.ai_data.desire_y_rot);
+                    entity_data.ai_data.is_desire_rot = false;
+                    entity_data.ai_data.desire_y_rot = sim_state->Normilize_angle(entity_data.ai_data.desire_y_rot + angle);
+                }
 
                 entity_data.ai_data.time_elapsed = 0;
             }
