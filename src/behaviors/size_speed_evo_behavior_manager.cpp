@@ -76,7 +76,7 @@ void ovum::Size_speed_evo_behavior_manager::New_day()
             entieties[i].ai_data.state = Ai_state::HUNTING;
             entieties[i].ai_data.time_elapsed = 0;
 
-            if(entieties[i].food_eaten >= 2)
+            if(entieties[i].food_eaten >= sim_state->food_reproduction_need)
             {
                 auto new_id = main_scene->Add_entity();
                 entieties[new_id].speed = entieties[i].speed;
@@ -176,7 +176,7 @@ void ovum::Size_speed_evo_behavior_manager::Update_hunting(eruptor::scene::Rende
     render_object.Move( forward * entity_data.speed * delta_time );
     entity_data.energy -= sim_state->formula.Evaluate(entity_data) * delta_time;
 
-    if(entity_data.energy < 5 && entity_data.food_eaten > 0)
+    if(entity_data.energy < 5 && entity_data.food_eaten >= sim_state->food_survive_need)
     {
         entity_data.ai_data.state = Ai_state::RETURN;
     }
@@ -334,13 +334,13 @@ void ovum::Size_speed_evo_behavior_manager::React_to_event(const eruptor::event:
 
             if(auto entity = main_scene->Get_if_is_entiety( colision->object_b_id ); main_scene->Get_if_is_food( colision->object_a_id ) && entity)
             {
-                entity.value().get().Eat();
+                entity.value().get().Eat(sim_state->food_reproduction_need);
 
                 main_scene->Remove_food( colision->object_a_id );
             }
             else if(auto entity = main_scene->Get_if_is_entiety( colision->object_a_id ); entity && main_scene->Get_if_is_food( colision->object_b_id ) )
             {
-                entity.value().get().Eat();
+                entity.value().get().Eat(sim_state->food_reproduction_need);
 
                 main_scene->Remove_food( colision->object_b_id );
             }
@@ -352,15 +352,13 @@ void ovum::Size_speed_evo_behavior_manager::React_to_event(const eruptor::event:
 
                 if(entity_a.size >= (1.30 * entity_b.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
                 {
-                    std::println(std::clog, "KANIBALIZM!");
-                    entity_a.Eat();
+                    entity_a.Eat(sim_state->food_reproduction_need);
 
                     main_scene->Remove_entity( entity_b.render_object_id );
                 }
                 else if(entity_b.size >= (1.30 * entity_a.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
                 {
-                    std::println(std::clog, "KANIBALIZM!");
-                    entity_b.Eat();
+                    entity_b.Eat(sim_state->food_reproduction_need);
 
                     main_scene->Remove_entity( entity_a.render_object_id );
                 }

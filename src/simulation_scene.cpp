@@ -383,11 +383,11 @@ void ovum::Entiety_data::Reset()
     ai_data.state = Ai_state::RESTING;
 }
 
-void ovum::Entiety_data::Eat()
+void ovum::Entiety_data::Eat(uint32_t reproduction_need)
 {
     food_eaten++;
 
-    if(food_eaten >= 2)
+    if(food_eaten >= reproduction_need)
     {
         ai_data.state = Ai_state::RETURN;
     }
