@@ -1,10 +1,12 @@
 #Simulation configuration
 
-#Current behavior activated
-#TO DO:
-#Implement bahavior switching system with config and simulation reset (TEST A LOT PLEASE!)
+#MODE LEGEND:
+# SUR - survive mode
+# SP - speed mode
+# SP_SI - size, speed, mode
+# SP_SI_SE - size, speed, sense mode
 
-
+~Mode~ SP_SI_SE
 
 ~Energy formula~ ((size * size * size) * (speed * speed)) + sense
 
@@ -14,3 +16,4 @@
 ~Food per day~ 100
 ~Survive need~ 1
 ~Reproduction need~ 1
+

@@ -38,7 +38,6 @@ void ovum::Simulation_state::Init(App & app)
     size_speed_evo_behavior.Init( *this );
     speed_evo_behavior.Init( *this );
     survive_behavior.Init( *this );
-    Set_entity_behavior(sense_speed_size_evo_behavior);
 
     auto & parser = app.resources->config_parser;
     auto config_data = parser.Parse_config_file("../../configuration/simulation.papcfg");
@@ -52,6 +51,24 @@ void ovum::Simulation_state::Init(App & app)
         parser.Convert_string_to_number(config_data->at("Food per day"), food_per_day, "Food per day");
         parser.Convert_string_to_number(config_data->at("Survive need"), food_survive_need, "Survive need");
         parser.Convert_string_to_number(config_data->at("Reproduction need"), food_reproduction_need, "Reproduction need");
+
+        std::string_view mode = config_data->at("Mode");
+        if(mode == "SUR")
+        {
+            Set_entity_behavior(survive_behavior);
+        }
+        else if(mode == "SP")
+        {
+            Set_entity_behavior(speed_evo_behavior);
+        }
+        else if(mode == "SP_SI")
+        {
+            Set_entity_behavior(size_speed_evo_behavior);
+        }
+        else if(mode == "SP_SI_SE")
+        {
+            Set_entity_behavior(sense_speed_size_evo_behavior);
+        }
     }
 }
 

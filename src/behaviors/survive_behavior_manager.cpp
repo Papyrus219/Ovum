@@ -115,8 +115,22 @@ void ovum::Survive_behavior_manager::Update_hunting(eruptor::scene::Render_objec
 
     if(near_wall)
     {
-        entity_data.ai_data.desire_y_rot = std::atan2(-desired_dir.z, desired_dir.x);
-        entity_data.ai_data.is_desire_rot = false;
+        glm::vec3 center = (app->world_min + app->world_max) * 0.5f;
+        glm::vec3 to_center = center - pos;
+        to_center.y = 0.0f;
+        to_center = glm::normalize(to_center);
+
+        float target = entity_data.ai_data.desire_y_rot;
+        glm::vec3 target_dir{ std::cos(target), 0.0f, -std::sin(target) };
+
+        if(glm::dot(target_dir, to_center) < 0.3f)
+        {
+            std::uniform_real_distribution<float> spread(-glm::radians(40.0f), glm::radians(40.0f));
+
+            float base = std::atan2(-to_center.z, to_center.x);
+            entity_data.ai_data.desire_y_rot = sim_state->Normilize_angle(base + spread(*generator));
+            entity_data.ai_data.is_desire_rot = false;
+        }
     }
 
     if(entity_data.ai_data.is_desire_rot)
@@ -127,9 +141,14 @@ void ovum::Survive_behavior_manager::Update_hunting(eruptor::scene::Render_objec
         {
             if((*decision_distributor)(*generator) == 1)
             {
+                float angle = (*rotation_distributor)(*generator);
+                if((*decision_distributor)(*generator) == 1)
+                {
+                    angle = -angle;
+                }
+
                 entity_data.ai_data.is_desire_rot = false;
-                entity_data.ai_data.desire_y_rot += (*rotation_distributor)(*generator);
-                entity_data.ai_data.desire_y_rot = sim_state->Normilize_angle(entity_data.ai_data.desire_y_rot);;
+                entity_data.ai_data.desire_y_rot = sim_state->Normilize_angle(entity_data.ai_data.desire_y_rot + angle);
             }
 
             entity_data.ai_data.time_elapsed = 0;
