@@ -9,6 +9,7 @@
 #include <Ovum/behaviors/sense_size_speed_evo_behavior_manager.hpp>
 #include <Ovum/gp_communicator.hpp>
 #include <Ovum/formula.hpp>
+#include <Ovum/simulation_settings.hpp>
 #include <random>
 
 namespace ovum
@@ -44,6 +45,7 @@ public:
     std::uniform_real_distribution<float> z_pos_distribution{};
 
     std::vector<uint16_t> population{};
+    uint64_t day_passed{};
 
     float time_acumulator{};
 

@@ -109,11 +109,17 @@ void ovum::Simulation_state::Update()
 void ovum::Simulation_state::Update_graph()
 {
     population.push_back( app->main_scene.entieties.size() );
+    day_passed++;
+
+    if(population.size() > 30)
+    {
+        population.erase( population.begin() );
+    }
 
     gp_comm_pop.Begin_frame();
-    for(auto i{0UZ}; i < population.size(); i++)
+    for(auto i{0UZ}; i < 30; i++)
     {
-        gp_comm_pop.Stage_data({i, population[i]});
+        gp_comm_pop.Stage_data({ (day_passed > 30)? day_passed - (30 - i) : i , (population.size() > i) ? population[i] : 0});
     }
     gp_comm_pop.End_frame();
 }
