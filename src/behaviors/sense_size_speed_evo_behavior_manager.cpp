@@ -124,36 +124,8 @@ void ovum::Sense_size_speed_evo_behavior_manager::Update_hunting(eruptor::scene:
 {
     glm::vec3 pos = render_object.Get_position();
 
-    bool near_wall{};
-    glm::vec3 desired_dir = render_object.Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f};
 
-    if(pos.x > app->world_max.x - sim_state->wall_margin)
-    {
-        desired_dir.x = -std::abs(desired_dir.x);
-        near_wall = true;
-    }
-    else if(pos.x < app->world_min.x + sim_state->wall_margin)
-    {
-        desired_dir.x = std::abs(desired_dir.x);
-        near_wall = true;
-    }
 
-    if(pos.z > app->world_max.z - sim_state->wall_margin)
-    {
-        desired_dir.z = -std::abs(desired_dir.z);
-        near_wall = true;
-    }
-    else if(pos.z < app->world_min.z + sim_state->wall_margin)
-    {
-        desired_dir.z = std::abs(desired_dir.z);
-        near_wall = true;
-    }
-
-    if(near_wall)
-    {
-        entity_data.ai_data.desire_y_rot = std::atan2(-desired_dir.z, desired_dir.x);
-        entity_data.ai_data.is_desire_rot = false;
-    }
 
     if(entity_data.ai_data.desire_dirr != glm::vec3{0.0, 0.0, 0.0})
     {
@@ -161,101 +133,32 @@ void ovum::Sense_size_speed_evo_behavior_manager::Update_hunting(eruptor::scene:
     }
     else
     {
-        if(entity_data.ai_data.is_desire_rot)
-        {
-            entity_data.ai_data.time_elapsed += delta_time;
 
-            if(entity_data.ai_data.time_elapsed >= 0.5)
-            {
-                if((*decision_distributor)(*generator) == 1)
-                {
-                    float angle = (*rotation_distributor)(*generator);
-                    if((*decision_distributor)(*generator) == 1)
-                    {
-                        angle = -angle;
-                    }
-
-                    entity_data.ai_data.is_desire_rot = false;
-                    entity_data.ai_data.desire_y_rot = sim_state->Normilize_angle(entity_data.ai_data.desire_y_rot + angle);
-                }
-
-                entity_data.ai_data.time_elapsed = 0;
-            }
-        }
-        else
-        {
-            float diff = sim_state->Normilize_angle( entity_data.ai_data.desire_y_rot - entity_data.ai_data.curr_y_rot );
-            if(std::abs(diff) > 0.05f)
-            {
-                float step = std::copysign( std::max(1.0f, entity_data.speed) * delta_time, diff);
-                if(std::abs(step) > std::abs(diff))
-                {
-                    step = diff;
-                }
-
-                render_object.Rotate({0.0f, step, 0.0f});
-                entity_data.ai_data.curr_y_rot = sim_state->Normilize_angle(entity_data.ai_data.curr_y_rot + step);
-            }
-            else
-            {
-                entity_data.ai_data.is_desire_rot = true;
-            }
-        }
     }
 
-    glm::vec3 forward  = render_object.Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f} ;
-    render_object.Move( forward * entity_data.speed * delta_time );
-    entity_data.energy -= sim_state->formula.Evaluate(entity_data) * delta_time;
 
-    if(entity_data.energy < 5 && entity_data.food_eaten >= sim_state->food_survive_need)
+    if(entity.energy < 5 && entity.food_eaten >= sim_state->food_survive_need)
     {
-        entity_data.ai_data.state = Ai_state::RETURN;
+        entity.ai_data.state = Ai_state::RETURN;
     }
-    else if(entity_data.energy <= 0)
+    else if(entity.energy <= 0)
     {
         render_object.color = eruptor::resource::Color{255, 255, 255, 255};
-        entity_data.ai_data.state = Ai_state::DEAD;
-        dead_ids.push_back( entity_data.render_object_id );
+        entity.ai_data.state = Ai_state::DEAD;
+        dead_ids.push_back( entity.render_object_id );
 
         finished_entities++;
     }
 
     pos = render_object.Get_position();
-    bool hit_wall = false;
 
-    if(pos.x > app->world_max.x) {pos.x = app->world_max.x; hit_wall = true;}
-    else if(pos.x < app->world_min.x) {pos.x = app->world_min.x; hit_wall = true;}
-
-    if(pos.z > app->world_max.z) {pos.z = app->world_max.z; hit_wall = true;}
-    else if(pos.z < app->world_min.z) {pos.z = app->world_min.z; hit_wall = true;}
-
-    if(hit_wall)
-    {
-        render_object.Set_position(pos);
-
-        if(pos.x == app->world_max.x || pos.x == app->world_min.x) forward.x = -forward.x;
-        if(pos.z == app->world_max.z || pos.z == app->world_min.z) forward.z = -forward.z;
-
-        float new_y_rot = std::atan2(-forward.z, forward.x);
-
-        entity_data.ai_data.curr_y_rot = new_y_rot;
-        entity_data.ai_data.desire_y_rot = new_y_rot;
-        entity_data.ai_data.is_desire_rot = false;
-
-        render_object.Set_rotation_quad( glm::angleAxis(new_y_rot, glm::vec3{0.0f, 1.0f, 0.0f}) );
-    }
 }
 
 void ovum::Sense_size_speed_evo_behavior_manager::Update_return(eruptor::scene::Render_object& render_object, Entiety_data& entity_data, float delta_time)
 {
     glm::vec3 pos = render_object.Get_position();
 
-    float dist_max_x = app->world_max.x - pos.x;
-    float dist_min_x = pos.x - app->world_min.x;
-    float dist_max_z = app->world_max.z - pos.z;
-    float dist_min_z = pos.z - app->world_min.z;
 
-    float min_dist = std::min({dist_max_x, dist_min_x, dist_max_z, dist_min_z});
 
     glm::vec3 target_dir{0.0f};
 
@@ -401,56 +304,7 @@ void Sense_size_speed_evo_behavior_manager::React_to_event(const eruptor::event:
         {
             if(colision->object_a_layer == 1)
             {
-                if(auto entity_a_wraper = app->main_scene.Get_if_is_entiety(colision->object_a_id))
-                {
-                    auto & entity_a = entity_a_wraper.value().get();
-                    if(entity_a.ai_data.state != Ai_state::HUNTING) return;
 
-                    if(main_scene->Get_if_is_food(colision->object_b_id))
-                    {
-                        entity_a.ai_data.Add_dirr_of_intrest(main_scene->render_objects[colision->object_a_id].Get_position(), main_scene->render_objects[colision->object_b_id].Get_position(), 1, 2);
-                    }
-                    else if(auto entity_b_wraper = main_scene->Get_if_is_entiety(colision->object_b_id))
-                    {
-                        auto & entity_b = entity_b_wraper.value().get();
-
-                        if(entity_b.size <= (1.30 * entity_a.size))
-                        {
-                            entity_a.ai_data.Add_dirr_of_intrest(main_scene->render_objects[colision->object_a_id].Get_position(), main_scene->render_objects[colision->object_b_id].Get_position(), 1, 2);
-                        }
-                        else if(entity_b.size >= (1.30 * entity_a.size))
-                        {
-                            entity_a.ai_data.Add_dirr_of_intrest(main_scene->render_objects[colision->object_b_id].Get_position(), main_scene->render_objects[colision->object_a_id].Get_position(), 100, 2);
-                        }
-                    }
-                }
-            }
-            else if(colision->object_b_layer == 1)
-            {
-                if(auto entity_b_wraper = main_scene->Get_if_is_entiety(colision->object_b_id))
-                {
-                    auto & entity_b = entity_b_wraper.value().get();
-                    if(entity_b.ai_data.state != Ai_state::HUNTING) return;
-
-                    if(main_scene->Get_if_is_food(colision->object_a_id))
-                    {
-                        entity_b.ai_data.Add_dirr_of_intrest(main_scene->render_objects[colision->object_b_id].Get_position(), main_scene->render_objects[colision->object_a_id].Get_position(), 1, 2);
-                    }
-                    else if(auto entity_a_wraper = main_scene->Get_if_is_entiety(colision->object_a_id))
-                    {
-                        auto & entity_a = entity_a_wraper.value().get();
-
-                        if(entity_a.size <= (1.30 * entity_b.size))
-                        {
-                            entity_b.ai_data.Add_dirr_of_intrest(main_scene->render_objects[colision->object_b_id].Get_position(), main_scene->render_objects[colision->object_a_id].Get_position(), 1, 2);
-                        }
-                        else if(entity_a.size >= (1.30 * entity_b.size))
-                        {
-                            entity_b.ai_data.Add_dirr_of_intrest(main_scene->render_objects[colision->object_a_id].Get_position(), main_scene->render_objects[colision->object_b_id].Get_position(), 100, 2);
-                        }
-                    }
-                }
-            }
         }
     }
 }

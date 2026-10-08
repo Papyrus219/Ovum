@@ -31,10 +31,6 @@ set(APP_SRC ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
             ${CMAKE_CURRENT_LIST_DIR}/src/ai_state.cpp
 
             ${CMAKE_CURRENT_LIST_DIR}/src/behaviors/entity_behavior_manager.cpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/behaviors/speed_evo_behavior_manager.cpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/behaviors/survive_behavior_manager.cpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/behaviors/size_speed_evo_behavior_manager.cpp
-            ${CMAKE_CURRENT_LIST_DIR}/src/behaviors/sense_size_speed_evo_behavior_manager.cpp
             ${CMAKE_CURRENT_LIST_DIR}/src/formula.cpp
 )
 

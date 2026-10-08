@@ -1,12 +1,21 @@
 #Simulation configuration
 
-#MODE LEGEND:
-# SUR - survive mode
-# SP - speed mode
-# SP_SI - size, speed, mode
-# SP_SI_SE - size, speed, sense mode
+~Speed evo~ ON
+~Size evo~ ON
+~Sense evo~ ON
 
-~Mode~ SP_SI_SE
+~Use sense with movement~ ON
+~Canibalism~ ON
+
+~Speed evo range min~ -0.3
+~Speed evo range max~  0.3
+
+~Size evo range min~ -0.29
+~Size evo range max~  0.29
+
+~Sense evo range min~ -0.3
+~Sense evo range max~  0.3
+
 
 ~Energy formula~ ((size * size * size) * (speed * speed)) + sense
 
@@ -15,5 +24,5 @@
 ~Start energy~ 500
 ~Food per day~ 100
 ~Survive need~ 1
-~Reproduction need~ 1
+~Reproduction need~ 2
 

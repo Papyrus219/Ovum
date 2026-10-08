@@ -34,41 +34,60 @@ void ovum::Simulation_state::Init(App & app)
 
     this->main_scene = &app.main_scene;
 
-    sense_speed_size_evo_behavior.Init( *this );
-    size_speed_evo_behavior.Init( *this );
-    speed_evo_behavior.Init( *this );
-    survive_behavior.Init( *this );
+    behavior_manager.Init( *this );
 
     auto & parser = app.resources->config_parser;
     auto config_data = parser.Parse_config_file("../../configuration/simulation.papcfg");
 
     if(config_data)
     {
+        if(config_data->at("Speed evo") == "ON")
+        {
+            sim_settings.is_speed_evo_enabled = true;
+
+            float min{}, max{};
+            parser.Convert_string_to_number(config_data->at("Speed evo range min"), min, "Speed evo range min");
+            parser.Convert_string_to_number(config_data->at("Speed evo range max"), max, "Speed evo range max");
+
+            sim_settings.speed_evo_distributor.param( std::uniform_real_distribution<float>::param_type{ min, max } );
+        }
+        if(config_data->at("Size evo") == "ON")
+        {
+            sim_settings.is_size_evo_enabled = true;
+
+            float min{}, max{};
+            parser.Convert_string_to_number(config_data->at("Size evo range min"), min, "Size evo range min");
+            parser.Convert_string_to_number(config_data->at("Size evo range max"), max, "Size evo range max");
+
+            sim_settings.size_evo_distributor.param( std::uniform_real_distribution<float>::param_type{ min, max } );
+        }
+        if(config_data->at("Sense evo") == "ON")
+        {
+            sim_settings.is_sense_evo_enabled = true;
+
+            float min{}, max{};
+            parser.Convert_string_to_number(config_data->at("Sense evo range min"), min, "Sense evo range min");
+            parser.Convert_string_to_number(config_data->at("Sense evo range max"), max, "Sense evo range max");
+
+            sim_settings.sense_evo_distributor.param( std::uniform_real_distribution<float>::param_type{ min, max } );
+        }
+
+        if(config_data->at("Use sense with movement") == "ON")
+        {
+            sim_settings.is_sense_used = true;
+        }
+        if(config_data->at("Canibalism") == "ON")
+        {
+            sim_settings.is_canibalism_enabled = true;
+        }
+
         registry = Make_registry();
         formula = Formula::Compile(config_data->at("Energy formula"), registry);
 
-        parser.Convert_string_to_number(config_data->at("Start energy"), start_energy, "Start energy");
-        parser.Convert_string_to_number(config_data->at("Food per day"), food_per_day, "Food per day");
-        parser.Convert_string_to_number(config_data->at("Survive need"), food_survive_need, "Survive need");
-        parser.Convert_string_to_number(config_data->at("Reproduction need"), food_reproduction_need, "Reproduction need");
-
-        std::string_view mode = config_data->at("Mode");
-        if(mode == "SUR")
-        {
-            Set_entity_behavior(survive_behavior);
-        }
-        else if(mode == "SP")
-        {
-            Set_entity_behavior(speed_evo_behavior);
-        }
-        else if(mode == "SP_SI")
-        {
-            Set_entity_behavior(size_speed_evo_behavior);
-        }
-        else if(mode == "SP_SI_SE")
-        {
-            Set_entity_behavior(sense_speed_size_evo_behavior);
-        }
+        parser.Convert_string_to_number(config_data->at("Start energy"), sim_settings.start_energy, "Start energy");
+        parser.Convert_string_to_number(config_data->at("Food per day"), sim_settings.food_per_day, "Food per day");
+        parser.Convert_string_to_number(config_data->at("Survive need"), sim_settings.food_survive_need, "Survive need");
+        parser.Convert_string_to_number(config_data->at("Reproduction need"), sim_settings.food_reproduction_need, "Reproduction need");
     }
 }
 
@@ -82,7 +101,7 @@ void ovum::Simulation_state::Enter_state()
 
     last_time = app->app_clock.now();
     Update_graph();
-    behavior_manager->Update_graph();
+    behavior_manager.Update_graph();
 }
 
 void ovum::Simulation_state::Update()
@@ -97,7 +116,7 @@ void ovum::Simulation_state::Update()
 
     while(time_acumulator >= fixed_delta_time)
     {
-        behavior_manager->Update_ai( fixed_delta_time );
+        behavior_manager.Update_ai( fixed_delta_time );
 
         app->physic_manager->Update_scene(*main_scene, fixed_delta_time);
         time_acumulator -= fixed_delta_time;
@@ -130,13 +149,6 @@ void ovum::Simulation_state::Render()
     {
         app->renderer->Stage_text_render_data( std::format("Simulation speed: {}", simulation_speed), 10, 80, app->main_font, {55, 20, 130, 255});
     }
-}
-
-void ovum::Simulation_state::Set_entity_behavior(Entity_behavior_manager & entity_behavior)
-{
-    Reload_scene();
-    this->behavior_manager = &entity_behavior;
-    this->behavior_manager->Setup();
 }
 
 float ovum::Simulation_state::Normilize_angle(float angle)
@@ -172,7 +184,7 @@ void ovum::Simulation_state::Reload_scene()
 
 void ovum::Simulation_state::React_to_event(const eruptor::event::Event & event)
 {
-    behavior_manager->React_to_event(event);
+    behavior_manager.React_to_event(event);
 
     if(auto mouse_scroll = event.Get_if<eruptor::event::Event::Mouse_scroll>())
     {
@@ -198,7 +210,7 @@ void ovum::Simulation_state::React_to_event(const eruptor::event::Event & event)
                 app->current_state->Enter_state();
                 break;
             case eruptor::event::Key::SPACE:
-                behavior_manager->New_day();
+                behavior_manager.New_day();
                 break;
             default:
                 break;
