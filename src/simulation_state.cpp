@@ -41,58 +41,88 @@ void ovum::Simulation_state::Init(App & app)
 
     if(config_data)
     {
-        if(config_data->at("Speed evo") == "ON")
+        auto is_speed_evo = Get_value_from_config_field(*config_data, "Speed evo");
+        if(is_speed_evo == "ON")
         {
             sim_settings.is_speed_evo_enabled = true;
 
             float min{}, max{};
-            parser.Convert_string_to_number(config_data->at("Speed evo range min"), min, "Speed evo range min");
-            parser.Convert_string_to_number(config_data->at("Speed evo range max"), max, "Speed evo range max");
+
+            auto speed_evo_min = Get_value_from_config_field(*config_data, "Speed evo range min");
+            parser.Convert_string_to_number(speed_evo_min, min, "Speed evo range min");
+
+            auto speed_evo_max = Get_value_from_config_field(*config_data, "Speed evo range max");
+            parser.Convert_string_to_number(speed_evo_max, max, "Speed evo range max");
 
             sim_settings.speed_evo_distributor.param( std::uniform_real_distribution<float>::param_type{ min, max } );
         }
-        if(config_data->at("Size evo") == "ON")
+
+        auto is_size_evo = Get_value_from_config_field(*config_data, "Size evo");
+        if(is_size_evo == "ON")
         {
             sim_settings.is_size_evo_enabled = true;
 
             float min{}, max{};
-            parser.Convert_string_to_number(config_data->at("Size evo range min"), min, "Size evo range min");
-            parser.Convert_string_to_number(config_data->at("Size evo range max"), max, "Size evo range max");
+
+            auto size_evo_min = Get_value_from_config_field(*config_data, "Size evo range min");
+            parser.Convert_string_to_number(size_evo_min, min, "Size evo range min");
+
+            auto size_evo_max = Get_value_from_config_field(*config_data, "Size evo range max");
+            parser.Convert_string_to_number(size_evo_max, max, "Size evo range max");
 
             sim_settings.size_evo_distributor.param( std::uniform_real_distribution<float>::param_type{ min, max } );
         }
-        if(config_data->at("Sense evo") == "ON")
+
+        auto is_sense_evo = Get_value_from_config_field(*config_data, "Sense evo");
+        if(is_sense_evo == "ON")
         {
             sim_settings.is_sense_evo_enabled = true;
 
             float min{}, max{};
-            parser.Convert_string_to_number(config_data->at("Sense evo range min"), min, "Sense evo range min");
-            parser.Convert_string_to_number(config_data->at("Sense evo range max"), max, "Sense evo range max");
+
+            auto sense_evo_min = Get_value_from_config_field(*config_data, "Sense evo range min");
+            parser.Convert_string_to_number(sense_evo_min, min, "Sense evo range min");
+
+            auto sense_evo_max = Get_value_from_config_field(*config_data, "Sense evo range max");
+            parser.Convert_string_to_number(sense_evo_max, max, "Sense evo range max");
 
             sim_settings.sense_evo_distributor.param( std::uniform_real_distribution<float>::param_type{ min, max } );
         }
 
-        if(config_data->at("Use sense with movement") == "ON")
+        auto is_sense_used = Get_value_from_config_field(*config_data, "Use sense with movement");
+        if(is_sense_used == "ON")
         {
             sim_settings.is_sense_used = true;
         }
-        if(config_data->at("Canibalism") == "ON")
+
+        auto is_canibalism = Get_value_from_config_field(*config_data, "Canibalism");
+        if(is_canibalism == "ON")
         {
             sim_settings.is_canibalism_enabled = true;
         }
 
-        if(config_data->at("Hunger can be satisfied") == "ON")
+        auto is_hunger_can_be_sat = Get_value_from_config_field(*config_data, "Hunger can be satisfied");
+        if(is_hunger_can_be_sat == "ON")
         {
             sim_settings.is_hunger_can_be_satisfied = true;
         }
 
         registry = Make_registry();
-        formula = Formula::Compile(config_data->at("Energy formula"), registry);
 
-        parser.Convert_string_to_number(config_data->at("Start energy"), sim_settings.start_energy, "Start energy");
-        parser.Convert_string_to_number(config_data->at("Food per day"), sim_settings.food_per_day, "Food per day");
-        parser.Convert_string_to_number(config_data->at("Survive need"), sim_settings.food_survive_need, "Survive need");
-        parser.Convert_string_to_number(config_data->at("Reproduction need"), sim_settings.food_reproduction_need, "Reproduction need");
+        auto formula_str = Get_value_from_config_field(*config_data, "Energy formula");
+        formula = Formula::Compile(formula_str, registry);
+
+        auto start_energy = Get_value_from_config_field(*config_data, "Start energy");
+        parser.Convert_string_to_number(start_energy, sim_settings.start_energy, "Start energy");
+
+        auto food_per_day = Get_value_from_config_field(*config_data, "Food per day");
+        parser.Convert_string_to_number(food_per_day, sim_settings.food_per_day, "Food per day");
+
+        auto survive_need = Get_value_from_config_field(*config_data, "Survive need");
+        parser.Convert_string_to_number(survive_need, sim_settings.food_survive_need, "Survive need");
+
+        auto reproduction_need = Get_value_from_config_field(*config_data, "Reproduction need");
+        parser.Convert_string_to_number(reproduction_need, sim_settings.food_reproduction_need, "Reproduction need");
     }
 }
 
@@ -159,6 +189,20 @@ void ovum::Simulation_state::Render()
     if(app->is_ui_rendered)
     {
         app->renderer->Stage_text_render_data( std::format("Simulation speed: {}", simulation_speed), 10, 80, app->main_font, {55, 20, 130, 255});
+    }
+}
+
+inline std::string_view ovum::Simulation_state::Get_value_from_config_field(const std::unordered_map<std::string, std::string> & config_data, std::string_view key)
+{
+    auto value_it = config_data.find(std::string( key ));
+    if(value_it != config_data.end())
+    {
+        return value_it->second;
+    }
+    else
+    {
+        std::print(std::cerr, "WARMING::SIMULATION_STATE::Missing setting in config file: {}\n", key);
+        return "";
     }
 }
 

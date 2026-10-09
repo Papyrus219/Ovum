@@ -396,7 +396,7 @@ void ovum::Entity_behavior_manager::Spawn_food(uint32_t food_amount)
     {
         auto id = main_scene->Add_food();
         auto render_id = main_scene->food[ id ].render_object_id;
-        main_scene->render_objects[ render_id ].Set_position( {sim_state->x_pos_distribution(sim_state->random_device), 0.1f, sim_state->z_pos_distribution(sim_settings->generator)} );
+        main_scene->render_objects[ render_id ].Set_position( {sim_state->x_pos_distribution(sim_settings->generator), 0.1f, sim_state->z_pos_distribution(sim_settings->generator)} );
     }
 }
 

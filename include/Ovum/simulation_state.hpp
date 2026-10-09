@@ -8,6 +8,7 @@
 #include <Ovum/formula.hpp>
 #include <Ovum/simulation_settings.hpp>
 #include <random>
+#include <unordered_map>
 
 namespace ovum
 {
@@ -28,6 +29,8 @@ public:
 
     float Normilize_angle(float angle);
     void Reload_scene();
+
+    std::string_view Get_value_from_config_field(const std::unordered_map<std::string, std::string> & config_data, std::string_view key);
 
     ovum::Simulation_scene * main_scene{};
 
