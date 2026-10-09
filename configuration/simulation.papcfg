@@ -1,11 +1,12 @@
 #Simulation configuration
 
-~Speed evo~ ON
-~Size evo~ ON
-~Sense evo~ ON
+~Speed evo~ OFF
+~Size evo~ OFF
+~Sense evo~ OFF
 
 ~Use sense with movement~ ON
-~Canibalism~ ON
+~Canibalism~ OFF
+~Hunger can be satisfied~ ON
 
 ~Speed evo range min~ -0.3
 ~Speed evo range max~  0.3
@@ -16,13 +17,12 @@
 ~Sense evo range min~ -0.3
 ~Sense evo range max~  0.3
 
-
 ~Energy formula~ ((size * size * size) * (speed * speed)) + sense
 
 #Basic stats
 
 ~Start energy~ 500
-~Food per day~ 100
+~Food per day~ 200
 ~Survive need~ 1
 ~Reproduction need~ 2
 

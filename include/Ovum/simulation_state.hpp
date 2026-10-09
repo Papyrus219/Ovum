@@ -3,7 +3,7 @@
 
 #include <Ovum/app_state.hpp>
 #include <Ovum/simulation_scene.hpp>
-#include <Ovum/behaviors/entity_behavior_manager.hpp>
+#include <Ovum/entity_behavior_manager.hpp>
 #include <Ovum/gp_communicator.hpp>
 #include <Ovum/formula.hpp>
 #include <Ovum/simulation_settings.hpp>

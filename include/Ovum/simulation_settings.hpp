@@ -18,6 +18,7 @@ struct Simulation_settings
     bool is_sense_used{};
 
     bool is_canibalism_enabled{};
+    bool is_hunger_can_be_satisfied{};
 
     uint32_t start_energy{};
     uint32_t food_per_day{};
@@ -25,7 +26,7 @@ struct Simulation_settings
     uint32_t food_reproduction_need{};
 
     std::mt19937  generator{};
-    std::uniform_int_distribution<uint8_t> decision_distributor{0, 2};
+    std::uniform_int_distribution<int> decision_distributor{0, 1};
     std::uniform_real_distribution<float> speed_evo_distributor{};
     std::uniform_real_distribution<float> size_evo_distributor{};
     std::uniform_real_distribution<float> sense_evo_distributor{};

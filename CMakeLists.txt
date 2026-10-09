@@ -30,7 +30,7 @@ set(APP_SRC ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
             ${CMAKE_CURRENT_LIST_DIR}/src/simulation_state.cpp
             ${CMAKE_CURRENT_LIST_DIR}/src/ai_state.cpp
 
-            ${CMAKE_CURRENT_LIST_DIR}/src/behaviors/entity_behavior_manager.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/src/entity_behavior_manager.cpp
             ${CMAKE_CURRENT_LIST_DIR}/src/formula.cpp
 )
 

@@ -81,6 +81,11 @@ void ovum::Simulation_state::Init(App & app)
             sim_settings.is_canibalism_enabled = true;
         }
 
+        if(config_data->at("Hunger can be satisfied") == "ON")
+        {
+            sim_settings.is_hunger_can_be_satisfied = true;
+        }
+
         registry = Make_registry();
         formula = Formula::Compile(config_data->at("Energy formula"), registry);
 
@@ -95,8 +100,14 @@ void ovum::Simulation_state::Enter_state()
 {
     for(auto & entity : main_scene->entieties)
     {
-        entity.ai_data.curr_y_rot = glm::eulerAngles( main_scene->render_objects[ entity.render_object_id ].Get_rotation() ).y;
         entity.Reset();
+
+        glm::vec3 forward = main_scene->render_objects[ entity.render_object_id ].Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f};
+        float yaw = std::atan2(-forward.z, forward.x);
+
+        entity.ai_data.curr_y_rot = yaw;
+        entity.ai_data.desire_y_rot = yaw;
+        entity.ai_data.is_desire_rot = true;
     }
 
     last_time = app->app_clock.now();

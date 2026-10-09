@@ -1,4 +1,4 @@
-#include <Ovum/behaviors/entity_behavior_manager.hpp>
+#include <Ovum/entity_behavior_manager.hpp>
 #include <Ovum/simulation_state.hpp>
 #include <Ovum/app.hpp>
 #include <Ovum/gp_communicator.hpp>
@@ -323,34 +323,32 @@ void ovum::Entity_behavior_manager::Corect_wander_direction(Entiety_data & entit
     auto forward  = render_object.Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f} ;
 
     bool near_wall{};
-    glm::vec3 desired_dir = render_object.Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f};
-
 
     if(pos.x > app->world_max.x - sim_state->wall_margin)
     {
-        desired_dir.x = -std::abs(desired_dir.x);
         near_wall = true;
     }
     else if(pos.x < app->world_min.x + sim_state->wall_margin)
     {
-        desired_dir.x = std::abs(desired_dir.x);
         near_wall = true;
     }
 
     if(pos.z > app->world_max.z - sim_state->wall_margin)
     {
-        desired_dir.z = -std::abs(desired_dir.z);
         near_wall = true;
     }
     else if(pos.z < app->world_min.z + sim_state->wall_margin)
     {
-        desired_dir.z = std::abs(desired_dir.z);
         near_wall = true;
     }
 
     if(near_wall)
     {
-        entity_data.ai_data.desire_y_rot = std::atan2(-desired_dir.z, desired_dir.x);
+        glm::vec3 to_center{(app->world_min.x + app->world_max.x) * 0.5f - pos.x, 0.0f,(app->world_min.z + app->world_max.z) * 0.5f - pos.z };
+
+        to_center = glm::normalize(to_center);
+
+        entity_data.ai_data.desire_y_rot = std::atan2(-to_center.z, to_center.x);
         entity_data.ai_data.is_desire_rot = false;
     }
 
@@ -398,7 +396,7 @@ void ovum::Entity_behavior_manager::Spawn_food(uint32_t food_amount)
     {
         auto id = main_scene->Add_food();
         auto render_id = main_scene->food[ id ].render_object_id;
-        main_scene->render_objects[ render_id ].Set_position( {sim_state->x_pos_distribution(sim_state->random_device), 0.1f, sim_state->z_pos_distribution(sim_state->random_device)} );
+        main_scene->render_objects[ render_id ].Set_position( {sim_state->x_pos_distribution(sim_state->random_device), 0.1f, sim_state->z_pos_distribution(sim_settings->generator)} );
     }
 }
 
@@ -420,12 +418,24 @@ void ovum::Entity_behavior_manager::React_to_event(const eruptor::event::Event& 
         {
             if( entity_a_wraper && food_b_wraper )
             {
-                entity_a_wraper.value().get().Eat();
+                auto & entity_a = entity_a_wraper.value().get();
+                if(sim_settings->is_hunger_can_be_satisfied && entity_a.food_eaten >= sim_settings->food_reproduction_need)
+                {
+                    return;
+                }
+
+                entity_a.Eat();
                 main_scene->Remove_food( food_b_wraper.value().get().render_object_id );
             }
             else if( entity_b_wraper && food_a_wraper )
             {
-                entity_b_wraper.value().get().Eat();
+                auto & entity_b = entity_b_wraper.value().get();
+                if(sim_settings->is_hunger_can_be_satisfied && entity_b.food_eaten >= sim_settings->food_reproduction_need)
+                {
+                    return;
+                }
+
+                entity_b.Eat();
                 main_scene->Remove_food( food_a_wraper.value().get().render_object_id );
             }
             else if( sim_settings->is_canibalism_enabled )
@@ -437,12 +447,22 @@ void ovum::Entity_behavior_manager::React_to_event(const eruptor::event::Event& 
 
                     if(entity_a.size >= (1.30 * entity_b.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
                     {
+                        if(sim_settings->is_hunger_can_be_satisfied && entity_a.food_eaten >= sim_settings->food_reproduction_need)
+                        {
+                            return;
+                        }
+
                         entity_a.Eat(sim_settings->food_reproduction_need);
 
                         main_scene->Remove_entity( entity_b.render_object_id );
                     }
                     else if(entity_b.size >= (1.30 * entity_a.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
                     {
+                        if(sim_settings->is_hunger_can_be_satisfied && entity_b.food_eaten >= sim_settings->food_reproduction_need)
+                        {
+                            return;
+                        }
+
                         entity_b.Eat(sim_settings->food_reproduction_need);
 
                         main_scene->Remove_entity( entity_a.render_object_id );
