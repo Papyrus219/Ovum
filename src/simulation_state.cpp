@@ -34,8 +34,6 @@ void ovum::Simulation_state::Init(App & app)
 
     this->main_scene = &app.main_scene;
 
-    behavior_manager.Init( *this );
-
     auto & parser = app.resources->config_parser;
     auto config_data = parser.Parse_config_file("../../configuration/simulation.papcfg");
 
@@ -124,6 +122,8 @@ void ovum::Simulation_state::Init(App & app)
         auto reproduction_need = Get_value_from_config_field(*config_data, "Reproduction need");
         parser.Convert_string_to_number(reproduction_need, sim_settings.food_reproduction_need, "Reproduction need");
     }
+
+    behavior_manager.Init( *this );
 }
 
 void ovum::Simulation_state::Enter_state()
@@ -179,9 +179,13 @@ void ovum::Simulation_state::Update_graph()
     gp_comm_pop.Begin_frame();
     for(auto i{0UZ}; i < 30; i++)
     {
-        gp_comm_pop.Stage_data({ (day_passed > 30)? day_passed - (30 - i) : i , (population.size() > i) ? population[i] : 0});
+        gp_comm_pop.Stage_data({ (day_passed > 30)? day_passed - (30 - i) : i , (population.size() > i) ? population[i] : 0}, 1, 0);
     }
-    gp_comm_pop.End_frame();
+
+    if(population.back() != 0)
+    {
+        gp_comm_pop.End_frame();
+    }
 }
 
 void ovum::Simulation_state::Render()

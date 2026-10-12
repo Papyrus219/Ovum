@@ -20,7 +20,7 @@ class Entity_behavior_manager
 public:
     void Init(Simulation_state & sim_state);
 
-    void Setup();
+    void Setup_graph();
     void Update_ai(float delta_time);
     void Spawn_food(uint32_t food_amount);
     void New_day();
@@ -57,6 +57,18 @@ protected:
 
     ovum::Simulation_scene * main_scene{};
     ovum::App * app{};
+
+    enum class Graph_mode
+    {
+        NONE,
+        SPEED,
+        SIZE,
+        SENSE,
+        SPEED_SIZE,
+        SPEED_SENSE,
+        SIZE_SENSE,
+        SPEED_SIZE_SENSE,
+    } graph_mode;
 };
 
 }

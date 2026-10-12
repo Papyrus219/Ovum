@@ -13,8 +13,10 @@ enum class GP_mode
 {
     NONE,
     MODE_2D_POINT,
-    Mode_2D_BARS,
+    MODE_2D_POINT_COLOR,
+    MODE_2D_BARS,
     MODE_3D_POINT,
+    MODE_3D_POINT_COLOR,
 };
 
 class GP_communicator
@@ -25,9 +27,9 @@ public:
     void Begin_frame();
     void End_frame();
 
-    void Enable_2d_points(const std::string & title);
+    void Enable_2d_points(const std::string & title, bool enable_colors = false);
     void Enable_2d_bars(const std::string & title, bool enable_floting_points = true);
-    void Enable_3d_points(const std::string & title, uint32_t size = 1);
+    void Enable_3d_points(const std::string & title, uint32_t size = 1, bool enable_colors = false);
 
     void Set_title(const std::string & title);
 
@@ -43,8 +45,8 @@ public:
     void Set_y_tics(float step);
     void Set_z_tics(float step);
 
-    void Stage_data(glm::vec3 vec3);
-    void Stage_data(glm::vec2 vec2);
+    void Stage_data(glm::vec3 vec3, float point_size, uint32_t rgb);
+    void Stage_data(glm::vec2 vec2, float point_size, uint32_t rgb);
     void Stage_data(float x);
 
     ~GP_communicator();
