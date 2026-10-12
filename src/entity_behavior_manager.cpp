@@ -219,6 +219,19 @@ void ovum::Entity_behavior_manager::Setup_graph()
 void ovum::Entity_behavior_manager::New_day()
 {
     sim_state->day_passed++;
+    auto & entieties = main_scene->entieties;
+
+    if(sim_settings->is_death_from_old_age_enabled)
+    {
+        for(auto i{0UZ}; i < entieties.size(); i++)
+        {
+            entieties[i].days_lived++;
+            if(entieties[i].days_lived > sim_settings->live_duration)
+            {
+                dead_ids.push_back(entieties[i].render_object_id);
+            }
+        }
+    }
 
     for(auto id : dead_ids)
     {
@@ -230,8 +243,6 @@ void ovum::Entity_behavior_manager::New_day()
     {
         main_scene->Remove_food( main_scene->food.back().render_object_id );
     }
-
-    auto & entieties = main_scene->entieties;
 
     for(auto i{0UZ}; i < entieties.size(); i++)
     {

@@ -37,6 +37,8 @@ void ovum::Simulation_state::Init(App & app)
     auto & parser = app.resources->config_parser;
     auto config_data = parser.Parse_config_file("../../configuration/simulation.papcfg");
 
+    uint32_t start_speed{}, start_size{}, start_sense{};
+
     if(config_data)
     {
         auto is_speed_evo = Get_value_from_config_field(*config_data, "Speed evo");
@@ -105,6 +107,15 @@ void ovum::Simulation_state::Init(App & app)
             sim_settings.is_hunger_can_be_satisfied = true;
         }
 
+        auto is_dead_from_old_age_enabled = Get_value_from_config_field(*config_data, "Dead from old age");
+        if(is_dead_from_old_age_enabled == "ON")
+        {
+            sim_settings.is_death_from_old_age_enabled = true;
+
+            auto live_duration = Get_value_from_config_field(*config_data, "Live duration");
+            parser.Convert_string_to_number(live_duration, sim_settings.live_duration, "Live duration");
+        }
+
         registry = Make_registry();
 
         auto formula_str = Get_value_from_config_field(*config_data, "Energy formula");
@@ -121,13 +132,19 @@ void ovum::Simulation_state::Init(App & app)
 
         auto reproduction_need = Get_value_from_config_field(*config_data, "Reproduction need");
         parser.Convert_string_to_number(reproduction_need, sim_settings.food_reproduction_need, "Reproduction need");
+
+        auto start_speed_str = Get_value_from_config_field(*config_data, "Start speed");
+        parser.Convert_string_to_number(start_speed_str, start_speed, "Start speed");
+
+        auto start_size_str = Get_value_from_config_field(*config_data, "Start speed");
+        parser.Convert_string_to_number(start_size_str, start_size, "Start size");
+
+        auto start_sense_str = Get_value_from_config_field(*config_data, "Start sense");
+        parser.Convert_string_to_number(start_sense_str, start_sense, "Start sense");
     }
 
     behavior_manager.Init( *this );
-}
 
-void ovum::Simulation_state::Enter_state()
-{
     for(auto & entity : main_scene->entieties)
     {
         entity.Reset();
@@ -135,11 +152,18 @@ void ovum::Simulation_state::Enter_state()
         glm::vec3 forward = main_scene->render_objects[ entity.render_object_id ].Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f};
         float yaw = std::atan2(-forward.z, forward.x);
 
+        entity.speed = start_speed;
+        entity.size = start_size;
+        entity.sense = start_sense;
+
         entity.ai_data.curr_y_rot = yaw;
         entity.ai_data.desire_y_rot = yaw;
         entity.ai_data.is_desire_rot = true;
     }
+}
 
+void ovum::Simulation_state::Enter_state()
+{
     last_time = app->app_clock.now();
     Update_graph();
     behavior_manager.Update_graph();

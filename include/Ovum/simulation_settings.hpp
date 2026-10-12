@@ -18,12 +18,14 @@ struct Simulation_settings
     bool is_sense_used{};
 
     bool is_canibalism_enabled{};
+    bool is_death_from_old_age_enabled{};
     bool is_hunger_can_be_satisfied{};
 
     uint32_t start_energy{};
     uint32_t food_per_day{};
     uint32_t food_survive_need{};
     uint32_t food_reproduction_need{};
+    uint32_t live_duration{};
 
     std::mt19937  generator{};
     std::uniform_int_distribution<int> decision_distributor{0, 1};

@@ -7,6 +7,7 @@
 ~Use sense with movement~ ON
 ~Canibalism~ ON
 ~Hunger can be satisfied~ ON
+~Dead from old age~ ON
 
 ~Speed evo range min~ -0.3
 ~Speed evo range max~  0.3
@@ -25,4 +26,8 @@
 ~Food per day~ 100
 ~Survive need~ 1
 ~Reproduction need~ 2
+~Live duration~ 2
 
+~Start speed~ 1
+~Start size~ 1
+~Start sense~ 8

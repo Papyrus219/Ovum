@@ -29,7 +29,8 @@ struct Entiety_data
 
     uint32_t render_object_id{};
 
-    uint8_t food_eaten;
+    uint8_t days_lived{};
+    uint8_t food_eaten{};
 };
 
 struct Food_data
