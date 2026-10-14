@@ -65,19 +65,22 @@ void ovum::Entity_behavior_manager::Update_ai(float delta_time)
         switch(entity.ai_data.state)
         {
             case Ai_state::HUNTING:
-                if(sim_settings->is_sense_used && entity.ai_data.desire_dirr != glm::vec3{})
+            {
+                bool near_wall = Corect_wander_direction(entity);
+                if(!near_wall && sim_settings->is_sense_used && entity.ai_data.desire_dirr != glm::vec3{})
                 {
                     entity.Rotate_to_intrest(*main_scene, delta_time);
                 }
                 else
                 {
+                    entity.ai_data.desire_dirr = {};
                     Rotate_random(entity, delta_time);
                 }
 
-                Corect_wander_direction(entity);
                 Walk_forward(entity, delta_time);
 
                 break;
+            }
             case Ai_state::RETURN:
                 Rotate_to_closest_border(entity, delta_time);
                 Walk_forward(entity, delta_time);
@@ -175,7 +178,6 @@ void ovum::Entity_behavior_manager::Setup_graph()
         {
             gp_comm_stats.Enable_2d_points("STATS", true);
             gp_comm_stats.Set_x_axis_title("Speed");
-            gp_comm_stats.Set_y_axis_title("Sense");
             Set_stat_ranges(SPEED_RANGE, SENSE_RANGE);
             break;
         }
@@ -229,16 +231,31 @@ void ovum::Entity_behavior_manager::New_day()
             entieties[i].days_lived++;
             if(entieties[i].days_lived > sim_settings->live_duration)
             {
-                dead_ids.push_back(entieties[i].render_object_id);
+                remove_entity_ids.push_back(entieties[i].render_object_id);
             }
         }
     }
 
-    for(auto id : dead_ids)
+    std::sort( remove_entity_ids.begin(), remove_entity_ids.end() );
+    auto last_e = std::unique( remove_entity_ids.begin(), remove_entity_ids.end() );
+    remove_entity_ids.erase(last_e, remove_entity_ids.end());
+
+    for(auto id : remove_entity_ids)
     {
         main_scene->Remove_entity( id );
     }
-    dead_ids.clear();
+    remove_entity_ids.clear();
+
+    std::sort( remove_food_ids.begin(), remove_food_ids.end() );
+    auto last_f = std::unique( remove_food_ids.begin(), remove_food_ids.end() );
+    remove_food_ids.erase(last_f, remove_food_ids.end());
+
+    for(auto id : remove_food_ids)
+    {
+        main_scene->Remove_food( id );
+    }
+    remove_food_ids.clear();
+
 
     while(!main_scene->food.empty())
     {
@@ -287,7 +304,8 @@ void ovum::Entity_behavior_manager::State_change_check(Entiety_data& entity_data
         {
             render_object.color = eruptor::resource::Color{255, 255, 255, 255};
             entity_data.ai_data.state = Ai_state::DEAD;
-            dead_ids.push_back( entity_data.render_object_id );
+            remove_entity_ids.push_back( entity_data.render_object_id );
+            main_scene->Deactive_hitboxes(entity_data.render_object_id);
 
             finished_entities++;
         }
@@ -330,7 +348,7 @@ void ovum::Entity_behavior_manager::State_change_check(Entiety_data& entity_data
         {
             render_object.color = eruptor::resource::Color{255, 255, 255, 255};
             entity_data.ai_data.state = Ai_state::DEAD;
-            dead_ids.push_back( entity_data.render_object_id );
+            remove_entity_ids.push_back( entity_data.render_object_id );
 
             finished_entities++;
         }
@@ -345,6 +363,7 @@ void ovum::Entity_behavior_manager::Inheritate_and_evolve_stats(Entiety_data & p
     child.size = parent.size;
     child.sense = parent.sense;
     child.ai_data = parent.ai_data;
+    child.parent_id = parent.render_object_id;
 
     if(sim_settings->is_speed_evo_enabled)
     {
@@ -423,7 +442,7 @@ void ovum::Entity_behavior_manager::Rotate_random(Entiety_data& entity_data, flo
         float diff = sim_state->Normilize_angle( entity_data.ai_data.desire_y_rot - entity_data.ai_data.curr_y_rot );
         if(std::abs(diff) > 0.05f)
         {
-            float step = std::copysign( std::max(1.0f, entity_data.speed) * delta_time, diff);
+            float step = std::copysign( std::max(1.0f, 6.0f) * delta_time, diff);
             if(std::abs(step) > std::abs(diff))
             {
                 step = diff;
@@ -489,7 +508,7 @@ void ovum::Entity_behavior_manager::Rotate_to_closest_border(Entiety_data& entit
     }
 }
 
-void ovum::Entity_behavior_manager::Corect_wander_direction(Entiety_data & entity_data)
+bool ovum::Entity_behavior_manager::Corect_wander_direction(Entiety_data & entity_data)
 {
     auto & render_object = main_scene->render_objects[ entity_data.render_object_id ];
     auto pos = render_object.Get_position();
@@ -548,6 +567,8 @@ void ovum::Entity_behavior_manager::Corect_wander_direction(Entiety_data & entit
 
         render_object.Set_rotation_quad( glm::angleAxis(new_y_rot, glm::vec3{0.0f, 1.0f, 0.0f}) );
     }
+
+    return near_wall;
 }
 
 void ovum::Entity_behavior_manager::Walk_forward(Entiety_data & entity_data, float delta_time)
@@ -720,80 +741,74 @@ void ovum::Entity_behavior_manager::React_to_event(const eruptor::event::Event& 
         if(colision->object_a_layer == ENTITY)
         {
             auto entity_a_wraper = main_scene->Get_if_is_entiety( colision->object_a_id );
-            if(!entity_a_wraper)
-            {
-                return;
-            }
+            if(!entity_a_wraper) return;
 
             auto & entity_a = entity_a_wraper.value().get();
 
-            if(sim_settings->is_hunger_can_be_satisfied && entity_a.food_eaten >= sim_settings->food_reproduction_need)
-            {
-                return;
-            }
+            if(!main_scene->render_objects[colision->object_a_id].is_active) return;
+            if(entity_a.ai_data.state != Ai_state::HUNTING) return;
+            if(sim_settings->is_hunger_can_be_satisfied && entity_a.food_eaten >= sim_settings->food_reproduction_need) return;
 
             if(colision->object_b_layer == FOOD)
             {
-                if(!main_scene->Get_if_is_food( colision->object_b_id ))
-                {
-                    return;
-                }
+                if(!main_scene->render_objects[ colision->object_b_id ].is_active) return;
+                if(!main_scene->Get_if_is_food( colision->object_b_id )) return;
 
-                entity_a.Eat();
-                main_scene->Remove_food( colision->object_b_id );
+                entity_a.Eat(sim_settings->food_reproduction_need);
+
+                main_scene->render_objects[ colision->object_b_id ].is_active = false;
+                main_scene->Deactive_hitboxes(colision->object_b_id);
+                remove_food_ids.push_back( colision->object_b_id );
             }
             else if(sim_settings->is_canibalism_enabled && colision->object_b_layer == ENTITY)
             {
+                if(!main_scene->render_objects[colision->object_b_id].is_active) return;
+
                 auto entity_b_wraper = main_scene->Get_if_is_entiety( colision->object_b_id );
-                if(!entity_b_wraper)
-                {
-                    return;
-                }
+                if(!entity_b_wraper) return;
 
                 auto & entity_b = entity_b_wraper.value().get();
 
-                if(entity_a.size >= (1.30 * entity_b.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
+                if(entity_a.parent_id == entity_b.render_object_id || entity_b.parent_id == entity_a.render_object_id) return;
+
+                if(entity_a.size >= (1.30 * entity_b.size) && entity_b.ai_data.state == Ai_state::HUNTING)
                 {
-                    if(sim_settings->is_hunger_can_be_satisfied && entity_a.food_eaten >= sim_settings->food_reproduction_need)
-                    {
-                        return;
-                    }
+                    if(sim_settings->is_hunger_can_be_satisfied && entity_a.food_eaten >= sim_settings->food_reproduction_need) return;
 
                     entity_a.Eat(sim_settings->food_reproduction_need);
 
-                    main_scene->Remove_entity( entity_b.render_object_id );
+                    main_scene->render_objects[ entity_b.render_object_id ].is_active = false;
+                    main_scene->Deactive_hitboxes(entity_b.render_object_id);
+                    remove_entity_ids.push_back( entity_b.render_object_id );
+
+                    entity_b.ai_data.state = Ai_state::DEAD;
+                    finished_entities++;
                 }
                 else if(entity_b.size >= (1.30 * entity_a.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
                 {
-                    if(sim_settings->is_hunger_can_be_satisfied && entity_b.food_eaten >= sim_settings->food_reproduction_need)
-                    {
-                        return;
-                    }
+                    if(sim_settings->is_hunger_can_be_satisfied && entity_b.food_eaten >= sim_settings->food_reproduction_need) return;
 
                     entity_b.Eat(sim_settings->food_reproduction_need);
 
-                    main_scene->Remove_entity( entity_a.render_object_id );
+                    main_scene->render_objects[ entity_a.render_object_id ].is_active = false;
+                    main_scene->Deactive_hitboxes(entity_a.render_object_id);
+                    remove_entity_ids.push_back( entity_a.render_object_id );
+
+                    entity_a.ai_data.state = Ai_state::DEAD;
+                    finished_entities++;
                 }
             }
         }
         else if(colision->object_a_layer == SENSE)
         {
-            if(!sim_settings->is_sense_used)
-            {
-                return;
-            }
+             if(!sim_settings->is_sense_used) return;
 
             auto entity_a_wraper = main_scene->Get_if_is_entiety( colision->object_a_id );
-            if(!entity_a_wraper)
-            {
-                return;
-            }
+            if(!entity_a_wraper) return;
 
             auto & entity_a = entity_a_wraper.value().get();
-            if(entity_a.ai_data.state != Ai_state::HUNTING)
-            {
-                return;
-            }
+            if(entity_a.ai_data.state != Ai_state::HUNTING) return;
+            if(!main_scene->render_objects[ colision->object_b_id ].is_active) return;
 
             if(colision->object_b_layer == FOOD)
             {
@@ -801,14 +816,20 @@ void ovum::Entity_behavior_manager::React_to_event(const eruptor::event::Event& 
             }
             else if(colision->object_b_layer == ENTITY)
             {
+                if(!sim_settings->is_canibalism_enabled) return;
+                if(colision->object_a_id == colision->object_b_id) return;
+
+                if(!main_scene->render_objects[ colision->object_b_id ].is_active) return;
+
                 auto entity_b_wraper = main_scene->Get_if_is_entiety( colision->object_b_id );
-                if(!entity_b_wraper)
-                {
-                    return;
-                }
+                if(!entity_b_wraper) return;
 
                 auto & entity_b = entity_b_wraper.value().get();
-                if(entity_b.size <= (1.30 * entity_a.size))
+
+                if(entity_b.ai_data.state != Ai_state::HUNTING) return;
+                if(entity_a.parent_id == entity_b.render_object_id || entity_b.parent_id == entity_a.render_object_id) return;
+
+                if(entity_a.size >= (1.30 * entity_b.size))
                 {
                     entity_a.ai_data.Add_dirr_of_intrest(main_scene->render_objects[colision->object_a_id].Get_position(), main_scene->render_objects[colision->object_b_id].Get_position(), 1, 2);
                 }

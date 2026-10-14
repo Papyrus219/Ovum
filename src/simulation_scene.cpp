@@ -277,7 +277,7 @@ void ovum::Simulation_scene::Remove_food(uint32_t render_object_id)
     }
 
     free_objects.push( render_object_id );
-    render_objects[ render_object_id ].is_active = false;
+
     Deactive_hitboxes(render_object_id);
     food.erase( it );
 }
@@ -398,7 +398,7 @@ void ovum::Entiety_data::Rotate_to_intrest(Simulation_scene & sim_scene, float d
 
     if(std::abs(diff) > 0.05f)
     {
-        float step = std::copysign(speed * delta_time, diff);
+        float step = std::copysign(6 * delta_time, diff);
 
         if(std::abs(step) > std::abs(diff))
         {

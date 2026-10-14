@@ -37,14 +37,15 @@ protected:
     void Rotate_random(Entiety_data & entity_data, float delta_time);
     void Rotate_to_closest_border(Entiety_data & entity_data, float delta_time);
 
-    void Corect_wander_direction(Entiety_data & entity_data);
+    bool Corect_wander_direction(Entiety_data & entity_data);
 
     void Walk_forward(Entiety_data & entity_data, float delta_time);
 
 
     bool day_should_end{};
     size_t finished_entities{};
-    std::vector<uint32_t> dead_ids{};
+    std::vector<uint32_t> remove_food_ids{};
+    std::vector<uint32_t> remove_entity_ids{};
 
     std::uniform_real_distribution<float> * x_pos_distribution{};
     std::uniform_real_distribution<float> * z_pos_distribution{};

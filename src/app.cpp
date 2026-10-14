@@ -67,7 +67,7 @@ void ovum::App::Init()
         std::println(std::clog, "Find world boundries: min: {} {} {} max: {} {} {}", world_min.x, world_min.y, world_min.z, world_max.x, world_max.y, world_max.z);
     }
 
-    current_state = &editor_state;
+    current_state = &simulation_state;
     last_time = app_clock.now();
     event_manager.Add_listener(*this);
 }
