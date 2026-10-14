@@ -2,6 +2,7 @@
 #include <Ovum/simulation_state.hpp>
 #include <Ovum/app.hpp>
 #include <Ovum/gp_communicator.hpp>
+#include <Ovum/physic_layers.hpp>
 #include <algorithm>
 #include <map>
 #include <array>
@@ -716,119 +717,104 @@ void ovum::Entity_behavior_manager::React_to_event(const eruptor::event::Event& 
 {
     if(auto colision = event.Get_if<eruptor::event::Event::Collision_occurred>())
     {
-        auto entity_a_wraper = main_scene->Get_if_is_entiety( colision->object_a_id );
-        auto entity_b_wraper = main_scene->Get_if_is_entiety( colision->object_b_id );
-        auto food_a_wraper = main_scene->Get_if_is_food( colision->object_a_id );
-        auto food_b_wraper = main_scene->Get_if_is_food( colision->object_b_id );
-
-        if( (colision->object_a_layer | colision->object_b_layer) == 0 )
+        if(colision->object_a_layer == ENTITY)
         {
-            if( entity_a_wraper && food_b_wraper )
+            auto entity_a_wraper = main_scene->Get_if_is_entiety( colision->object_a_id );
+            if(!entity_a_wraper)
             {
-                auto & entity_a = entity_a_wraper.value().get();
-                if(sim_settings->is_hunger_can_be_satisfied && entity_a.food_eaten >= sim_settings->food_reproduction_need)
+                return;
+            }
+
+            auto & entity_a = entity_a_wraper.value().get();
+
+            if(sim_settings->is_hunger_can_be_satisfied && entity_a.food_eaten >= sim_settings->food_reproduction_need)
+            {
+                return;
+            }
+
+            if(colision->object_b_layer == FOOD)
+            {
+                if(!main_scene->Get_if_is_food( colision->object_b_id ))
                 {
                     return;
                 }
 
                 entity_a.Eat();
-                main_scene->Remove_food( food_b_wraper.value().get().render_object_id );
+                main_scene->Remove_food( colision->object_b_id );
             }
-            else if( entity_b_wraper && food_a_wraper )
+            else if(sim_settings->is_canibalism_enabled && colision->object_b_layer == ENTITY)
             {
-                auto & entity_b = entity_b_wraper.value().get();
-                if(sim_settings->is_hunger_can_be_satisfied && entity_b.food_eaten >= sim_settings->food_reproduction_need)
+                auto entity_b_wraper = main_scene->Get_if_is_entiety( colision->object_b_id );
+                if(!entity_b_wraper)
                 {
                     return;
                 }
 
-                entity_b.Eat();
-                main_scene->Remove_food( food_a_wraper.value().get().render_object_id );
-            }
-            else if( sim_settings->is_canibalism_enabled )
-            {
-                if(entity_a_wraper && entity_b_wraper)
+                auto & entity_b = entity_b_wraper.value().get();
+
+                if(entity_a.size >= (1.30 * entity_b.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
                 {
-                    auto & entity_a = entity_a_wraper.value().get();
-                    auto & entity_b = entity_b_wraper.value().get();
-
-                    if(entity_a.size >= (1.30 * entity_b.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
+                    if(sim_settings->is_hunger_can_be_satisfied && entity_a.food_eaten >= sim_settings->food_reproduction_need)
                     {
-                        if(sim_settings->is_hunger_can_be_satisfied && entity_a.food_eaten >= sim_settings->food_reproduction_need)
-                        {
-                            return;
-                        }
-
-                        entity_a.Eat(sim_settings->food_reproduction_need);
-
-                        main_scene->Remove_entity( entity_b.render_object_id );
+                        return;
                     }
-                    else if(entity_b.size >= (1.30 * entity_a.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
+
+                    entity_a.Eat(sim_settings->food_reproduction_need);
+
+                    main_scene->Remove_entity( entity_b.render_object_id );
+                }
+                else if(entity_b.size >= (1.30 * entity_a.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
+                {
+                    if(sim_settings->is_hunger_can_be_satisfied && entity_b.food_eaten >= sim_settings->food_reproduction_need)
                     {
-                        if(sim_settings->is_hunger_can_be_satisfied && entity_b.food_eaten >= sim_settings->food_reproduction_need)
-                        {
-                            return;
-                        }
-
-                        entity_b.Eat(sim_settings->food_reproduction_need);
-
-                        main_scene->Remove_entity( entity_a.render_object_id );
+                        return;
                     }
+
+                    entity_b.Eat(sim_settings->food_reproduction_need);
+
+                    main_scene->Remove_entity( entity_a.render_object_id );
                 }
             }
         }
-        else if(sim_settings->is_sense_used)
+        else if(colision->object_a_layer == SENSE)
         {
-            if( (colision->object_a_layer | colision->object_b_layer) == 1 && (colision->object_a_layer & colision->object_b_layer) == 0 )
+            if(!sim_settings->is_sense_used)
             {
-                if(entity_a_wraper)
-                {
-                    auto & entity_a = entity_a_wraper.value().get();
-                    if(entity_a.ai_data.state != Ai_state::HUNTING) return;
-
-                    if(food_b_wraper)
-                    {
-                        entity_a.ai_data.Add_dirr_of_intrest(main_scene->render_objects[colision->object_a_id].Get_position(), main_scene->render_objects[colision->object_b_id].Get_position(), 1, 2);
-                    }
-                    else if(entity_b_wraper)
-                    {
-                        auto & entity_b = entity_b_wraper.value().get();
-
-                        if(entity_b.size <= (1.30 * entity_a.size))
-                        {
-                            entity_a.ai_data.Add_dirr_of_intrest(main_scene->render_objects[colision->object_a_id].Get_position(), main_scene->render_objects[colision->object_b_id].Get_position(), 1, 2);
-                        }
-                        else if(entity_b.size >= (1.30 * entity_a.size))
-                        {
-                            entity_a.ai_data.Add_dirr_of_intrest(main_scene->render_objects[colision->object_b_id].Get_position(), main_scene->render_objects[colision->object_a_id].Get_position(), 100, 2);
-                        }
-                    }
-                }
+                return;
             }
-            else if(colision->object_b_layer == 1)
+
+            auto entity_a_wraper = main_scene->Get_if_is_entiety( colision->object_a_id );
+            if(!entity_a_wraper)
             {
-                if(entity_b_wraper)
+                return;
+            }
+
+            auto & entity_a = entity_a_wraper.value().get();
+            if(entity_a.ai_data.state != Ai_state::HUNTING)
+            {
+                return;
+            }
+
+            if(colision->object_b_layer == FOOD)
+            {
+                entity_a.ai_data.Add_dirr_of_intrest(main_scene->render_objects[colision->object_a_id].Get_position(), main_scene->render_objects[colision->object_b_id].Get_position(), 1, 2);
+            }
+            else if(colision->object_b_layer == ENTITY)
+            {
+                auto entity_b_wraper = main_scene->Get_if_is_entiety( colision->object_b_id );
+                if(!entity_b_wraper)
                 {
-                    auto & entity_b = entity_b_wraper.value().get();
-                    if(entity_b.ai_data.state != Ai_state::HUNTING) return;
+                    return;
+                }
 
-                    if(food_a_wraper)
-                    {
-                        entity_b.ai_data.Add_dirr_of_intrest(main_scene->render_objects[colision->object_b_id].Get_position(), main_scene->render_objects[colision->object_a_id].Get_position(), 1, 2);
-                    }
-                    else if(entity_a_wraper)
-                    {
-                        auto & entity_a = entity_a_wraper.value().get();
-
-                        if(entity_a.size <= (1.30 * entity_b.size))
-                        {
-                            entity_b.ai_data.Add_dirr_of_intrest(main_scene->render_objects[colision->object_b_id].Get_position(), main_scene->render_objects[colision->object_a_id].Get_position(), 1, 2);
-                        }
-                        else if(entity_a.size >= (1.30 * entity_b.size))
-                        {
-                            entity_b.ai_data.Add_dirr_of_intrest(main_scene->render_objects[colision->object_a_id].Get_position(), main_scene->render_objects[colision->object_b_id].Get_position(), 100, 2);
-                        }
-                    }
+                auto & entity_b = entity_b_wraper.value().get();
+                if(entity_b.size <= (1.30 * entity_a.size))
+                {
+                    entity_a.ai_data.Add_dirr_of_intrest(main_scene->render_objects[colision->object_a_id].Get_position(), main_scene->render_objects[colision->object_b_id].Get_position(), 1, 2);
+                }
+                else if(entity_b.size >= (1.30 * entity_a.size))
+                {
+                    entity_a.ai_data.Add_dirr_of_intrest(main_scene->render_objects[colision->object_b_id].Get_position(), main_scene->render_objects[colision->object_a_id].Get_position(), 100, 2);
                 }
             }
         }

@@ -90,6 +90,10 @@ struct Simulation_scene: public eruptor::scene::Scene
 
     eruptor::resource::Resource_manager * resource_manager{};
     eruptor::physic::Physic_manager * physic_manager{};
+
+private:
+    void Active_hitbox(uint8_t layer, uint32_t id);
+    void Deactive_hitboxes(uint32_t id);
 };
 
 }

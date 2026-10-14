@@ -1,4 +1,5 @@
 #include <Ovum/app.hpp>
+#include <Ovum/physic_layers.hpp>
 #include <Eruptor/resource/colors.hpp>
 #include <print>
 #include <iostream>
@@ -55,6 +56,12 @@ void ovum::App::Init()
 
             world_min = floor_aabb.min;
             world_max = floor_aabb.max;
+
+            physic_manager->Setup_grid(50, 30, floor_aabb, 2);
+            physic_manager->Request_layers_colision_test(SENSE, ENTITY);
+            physic_manager->Request_layers_colision_test(SENSE, FOOD);
+            physic_manager->Request_layers_colision_test(ENTITY, ENTITY);
+            physic_manager->Request_layers_colision_test(ENTITY, FOOD);
         }
 
         std::println(std::clog, "Find world boundries: min: {} {} {} max: {} {} {}", world_min.x, world_min.y, world_min.z, world_max.x, world_max.y, world_max.z);

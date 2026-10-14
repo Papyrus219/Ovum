@@ -1,4 +1,5 @@
 #include <Ovum/simulation_scene.hpp>
+#include <Ovum/physic_layers.hpp>
 #include <Eruptor/physic_manager.hpp>
 #include <iostream>
 #include <print>
@@ -121,20 +122,17 @@ uint32_t ovum::Simulation_scene::Add_entity()
     render_objects[ entieties.back().render_object_id ].color = eruptor::resource::Color{100, 200, 60};
     render_objects[ entieties.back().render_object_id ].shading_type = eruptor::scene::Shading_type::OPAQUE;
 
-    if(free_objects.empty())
-    {
-        physic_manager->Add_hitbox(0, entieties.back().render_object_id, *this);
-        physic_manager->Add_hitbox(1, entieties.back().render_object_id, *this);
-    }
+    auto id = entieties.back().render_object_id;
+    Active_hitbox(ENTITY, id);
+    Active_hitbox(SENSE, id);
 
-    if(auto sense_hitbox_wraper = physic_manager->Get_hitbox_data(1, entieties.back().render_object_id))
+    if(auto sense_hitbox_wraper = physic_manager->Get_hitbox_data(SENSE, id))
     {
         auto & sense_hitbox = sense_hitbox_wraper.value().get();
 
-        auto scale = render_objects[ entieties.back().render_object_id ].Get_scale();
+        auto scale = render_objects[ id ].Get_scale();
         auto sense = entieties.back().sense;
         sense_hitbox.Set_individual_scale( {scale.x + sense, scale.y + sense, scale.z + sense } );
-        sense_hitbox.Set_is_active( true );
     }
 
     return entieties.size() - 1;
@@ -182,10 +180,7 @@ uint32_t ovum::Simulation_scene::Add_food()
     render_objects[ food.back().render_object_id ].color = eruptor::resource::Color{60, 60, 200};
     render_objects[ food.back().render_object_id ].shading_type = eruptor::scene::Shading_type::OPAQUE;
 
-    if(free_objects.empty())
-    {
-        physic_manager->Add_hitbox(0, food.back().render_object_id, *this);
-    }
+    Active_hitbox(FOOD, food.back().render_object_id);
 
     return food.size() - 1;
 }
@@ -258,10 +253,7 @@ void ovum::Simulation_scene::Remove_entity(uint32_t render_object_id)
     free_objects.push( render_object_id );
     render_objects[ render_object_id ].is_active = false;
 
-    if(auto sense_hitbox = physic_manager->Get_hitbox_data(1, render_object_id))
-    {
-        sense_hitbox.value().get().Set_is_active( false );
-    }
+    Deactive_hitboxes(render_object_id);
 
     entieties.erase( it );
 }
@@ -286,6 +278,7 @@ void ovum::Simulation_scene::Remove_food(uint32_t render_object_id)
 
     free_objects.push( render_object_id );
     render_objects[ render_object_id ].is_active = false;
+    Deactive_hitboxes(render_object_id);
     food.erase( it );
 }
 
@@ -308,7 +301,7 @@ void ovum::Simulation_scene::Remove_light_source(uint32_t render_object_id)
     }
 
     free_objects.push( render_object_id );
-    render_objects[ render_object_id ].is_active = false;
+    Deactive_hitboxes(render_object_id);
     light_sources.erase( it );
 }
 
@@ -418,3 +411,28 @@ void ovum::Entiety_data::Rotate_to_intrest(Simulation_scene & sim_scene, float d
 
     ai_data.desire_dirr = {0, 0, 0};
 }
+
+void ovum::Simulation_scene::Active_hitbox(uint8_t layer, uint32_t id)
+{
+    physic_manager->Add_hitbox(layer, id, *this);
+
+    if(auto hitbox = physic_manager->Get_hitbox_data(layer, id))
+    {
+        hitbox->get().Set_is_active(true);
+    }
+}
+
+void ovum::Simulation_scene::Deactive_hitboxes(uint32_t id)
+{
+    for(uint8_t layer : {ENTITY, SENSE, FOOD})
+    {
+        if(auto hitbox = physic_manager->Get_hitbox_data(layer, id))
+        {
+            hitbox->get().Set_is_active(false);
+        }
+    }
+}
+
+
+
+
