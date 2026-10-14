@@ -3,14 +3,12 @@
 
 #include <Ovum/app_state.hpp>
 #include <Ovum/simulation_scene.hpp>
-#include <Ovum/behaviors/speed_evo_behavior_manager.hpp>
-#include <Ovum/behaviors/survive_behavior_manager.hpp>
-#include <Ovum/behaviors/size_speed_evo_behavior_manager.hpp>
-#include <Ovum/behaviors/sense_size_speed_evo_behavior_manager.hpp>
+#include <Ovum/entity_behavior_manager.hpp>
 #include <Ovum/gp_communicator.hpp>
 #include <Ovum/formula.hpp>
 #include <Ovum/simulation_settings.hpp>
 #include <random>
+#include <unordered_map>
 
 namespace ovum
 {
@@ -29,10 +27,10 @@ public:
 
     virtual std::string_view Get_state_name() override {return "Simulation";}
 
-    void Set_entity_behavior(Entity_behavior_manager & entity_behavior);
-
     float Normilize_angle(float angle);
     void Reload_scene();
+
+    std::string_view Get_value_from_config_field(const std::unordered_map<std::string, std::string> & config_data, std::string_view key);
 
     ovum::Simulation_scene * main_scene{};
 
@@ -56,16 +54,9 @@ public:
 
     float wall_margin{3.0f};
 
-    Speed_evo_behavior_manager speed_evo_behavior{};
-    Size_speed_evo_behavior_manager size_speed_evo_behavior{};
-    Sense_size_speed_evo_behavior_manager sense_speed_size_evo_behavior{};
-    Survive_behavior_manager survive_behavior;
-    Entity_behavior_manager * behavior_manager{};
+    Entity_behavior_manager behavior_manager{};
 
-    uint32_t start_energy{};
-    uint32_t food_per_day{};
-    uint32_t food_survive_need{};
-    uint32_t food_reproduction_need{};
+    Simulation_settings sim_settings{};
 
     Formula formula{};
     Registry registry{};

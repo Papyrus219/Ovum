@@ -28,8 +28,10 @@ struct Entiety_data
     float energy{500};
 
     uint32_t render_object_id{};
+    uint32_t parent_id{};
 
-    uint8_t food_eaten;
+    uint8_t days_lived{};
+    uint8_t food_eaten{};
 };
 
 struct Food_data
@@ -89,6 +91,9 @@ struct Simulation_scene: public eruptor::scene::Scene
 
     eruptor::resource::Resource_manager * resource_manager{};
     eruptor::physic::Physic_manager * physic_manager{};
+
+    void Active_hitbox(uint8_t layer, uint32_t id);
+    void Deactive_hitboxes(uint32_t id);
 };
 
 }
