@@ -28,7 +28,7 @@ void ovum::GP_communicator::Begin_frame()
     }
     else if(mode == GP_mode::MODE_2D_BARS)
     {
-        fprintf(gnuplot, "plot '-' with boxes\n");
+        fprintf(gnuplot, "plot '-' using 1:2 with boxes notitle\n");
     }
     else if(mode == GP_mode::MODE_3D_POINT)
     {

@@ -10,7 +10,7 @@
 ~Dead from old age~ ON
 
 #When multichild is ON reproduction need is max food per day
-~Multichild~ OFF
+~Multichild~ ON
 
 ~Speed evo range min~ -0.3
 ~Speed evo range max~  0.3
@@ -26,9 +26,9 @@
 #Basic stats
 
 ~Start energy~ 500
-~Food per day~ 100
+~Food per day~ 200
 ~Survive need~ 1
-~Reproduction need~ 2
+~Reproduction need~ 10
 ~Live duration~ 10
 
 ~Start speed~ 1

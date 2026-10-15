@@ -205,19 +205,29 @@ void ovum::Simulation_state::Update_graph()
     }
 
     const auto n = population.size();
+    const float day_now = static_cast<float>(day_passed);
 
-    gp_comm_pop.Set_x_axis_range(day_passed - 29.5f, day_passed + 0.5f);
+    float max_pop = 0.0f;
+    for(auto p : population)
+    {
+        max_pop = std::max(max_pop, static_cast<float>(p));
+    }
+
+    const float x_min = std::max(-0.5f, day_now - 29.5f);
+    gp_comm_pop.Set_x_axis_range(x_min, x_min + 30.0f);
+    gp_comm_pop.Set_x_tics(5.0f);
+
+    const float y_max = std::max(5.0f, max_pop * 1.1f);
+    gp_comm_pop.Set_y_axis_range(0.0f, y_max);
+    gp_comm_pop.Set_y_tics(std::max(1.0f, std::ceil(y_max / 8.0f)));
+
     gp_comm_pop.Begin_frame();
     for(auto i{0UZ}; i < n; i++)
     {
-        const float day = static_cast<float>(day_passed) - static_cast<float>(n - 1 - i);
+        const float day = day_now - static_cast<float>(n - 1 - i);
         gp_comm_pop.Stage_data({day, static_cast<float>(population[i])}, 1, 0);
     }
-
-    if(population.back() != 0)
-    {
-        gp_comm_pop.End_frame();
-    }
+    gp_comm_pop.End_frame();
 }
 
 void ovum::Simulation_state::Render()

@@ -40,8 +40,8 @@ private:
     static constexpr float BUCKET_MARGIN{0.1f};
     static constexpr float MAX_POINT_SIZE{6.0f};
 
-    static constexpr Stat_range SPEED_RANGE{0, 6};
-    static constexpr Stat_range SIZE_RANGE{0, 6};
+    static constexpr Stat_range SPEED_RANGE{0, 12};
+    static constexpr Stat_range SIZE_RANGE{0, 12};
     static constexpr Stat_range SENSE_RANGE{0, 12};
     static constexpr Stat_range NONE_RANGE{0, 1};
 
