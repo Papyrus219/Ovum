@@ -5,6 +5,7 @@
 #include <Ovum/gp_communicator.hpp>
 #include <Ovum/simulation_settings.hpp>
 #include <Ovum/simulation_scene.hpp>
+#include <Ovum/stat_chart_manager.hpp>
 #include <cstdint>
 #include <random>
 
@@ -20,12 +21,9 @@ class Entity_behavior_manager
 public:
     void Init(Simulation_state & sim_state);
 
-    void Setup_graph();
     void Update_ai(float delta_time);
     void Spawn_food(uint32_t food_amount);
     void New_day();
-
-    void Update_graph();
 
     void React_to_event(const eruptor::event::Event & event);
 
@@ -41,6 +39,7 @@ protected:
 
     void Walk_forward(Entiety_data & entity_data, float delta_time);
 
+    Stat_chart_manager stat_chart_manager{};
 
     bool day_should_end{};
     size_t finished_entities{};
@@ -54,22 +53,9 @@ protected:
 
     Simulation_state * sim_state{};
     ovum::GP_communicator * gp_comm_pop{};
-    ovum::GP_communicator gp_comm_stats{};
 
     ovum::Simulation_scene * main_scene{};
     ovum::App * app{};
-
-    enum class Graph_mode
-    {
-        NONE,
-        SPEED,
-        SIZE,
-        SENSE,
-        SPEED_SIZE,
-        SPEED_SENSE,
-        SIZE_SENSE,
-        SPEED_SIZE_SENSE,
-    } graph_mode;
 };
 
 }
