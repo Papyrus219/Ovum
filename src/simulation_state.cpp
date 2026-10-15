@@ -116,6 +116,12 @@ void ovum::Simulation_state::Init(App & app)
             parser.Convert_string_to_number(live_duration, sim_settings.live_duration, "Live duration");
         }
 
+        auto is_multichild_enabled = Get_value_from_config_field(*config_data, "Multichild");
+        if(is_multichild_enabled == "ON")
+        {
+            sim_settings.is_multichild_enabled = true;
+        }
+
         registry = Make_registry();
 
         auto formula_str = Get_value_from_config_field(*config_data, "Energy formula");
@@ -198,10 +204,11 @@ void ovum::Simulation_state::Update_graph()
         population.erase( population.begin() );
     }
 
-    auto n = population.size();
+    const auto n = population.size();
 
+    gp_comm_pop.Set_x_axis_range(day_passed - 29.5f, day_passed + 0.5f);
     gp_comm_pop.Begin_frame();
-    for(auto i{0UZ}; i < 30; i++)
+    for(auto i{0UZ}; i < n; i++)
     {
         const float day = static_cast<float>(day_passed) - static_cast<float>(n - 1 - i);
         gp_comm_pop.Stage_data({day, static_cast<float>(population[i])}, 1, 0);

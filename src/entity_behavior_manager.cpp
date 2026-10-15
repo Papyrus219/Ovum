@@ -118,10 +118,21 @@ void ovum::Entity_behavior_manager::New_day()
         entieties[i].ai_data.state = Ai_state::HUNTING;
         entieties[i].ai_data.time_elapsed = 0;
 
-        if(entieties[i].food_eaten >= sim_settings->food_reproduction_need)
+        if(sim_settings->is_multichild_enabled)
         {
-            auto new_id = main_scene->Add_entity();
-            Inheritate_and_evolve_stats(entieties[i], entieties[new_id]);
+            for(auto c = entieties[i].food_eaten; c > 1; --c)
+            {
+                auto new_id = main_scene->Add_entity();
+                Inheritate_and_evolve_stats(entieties[i], entieties[new_id]);
+            }
+        }
+        else
+        {
+            if(entieties[i].food_eaten >= sim_settings->food_reproduction_need)
+            {
+                auto new_id = main_scene->Add_entity();
+                Inheritate_and_evolve_stats(entieties[i], entieties[new_id]);
+            }
         }
 
         entieties[i].food_eaten = 0;
@@ -141,7 +152,22 @@ void ovum::Entity_behavior_manager::State_change_check(Entiety_data& entity_data
 
     if(entity_data.ai_data.state == Ai_state::HUNTING)
     {
-        if((entity_data.food_eaten >= sim_settings->food_reproduction_need) || (entity_data.energy < 5 && entity_data.food_eaten >= sim_settings->food_survive_need))
+        bool should_return = entity_data.food_eaten >= sim_settings->food_reproduction_need;
+
+        if(!should_return && entity_data.food_eaten >= sim_settings->food_survive_need)
+        {
+            float wall_margin{0.3f};
+            float dist = std::max(0.0f, Distance_to_closest_border(pos) - wall_margin);
+
+            float speed = std::max(entity_data.speed, 0.1f);
+            float cost_per_unit = sim_state->formula.Evaluate(entity_data) / speed;
+
+            float return_cost = dist * cost_per_unit * 1.5f;
+
+            should_return = entity_data.energy <= return_cost + 1.0f;
+        }
+
+        if(should_return)
         {
             entity_data.ai_data.state = Ai_state::RETURN;
         }
@@ -341,7 +367,7 @@ void ovum::Entity_behavior_manager::Rotate_to_closest_border(Entiety_data& entit
 
     if(std::abs(diff) > 0.05f)
     {
-        float step = std::copysign(entity_data.speed * delta_time, diff);
+        float step = std::copysign(6.0f * delta_time, diff);
 
         if(std::abs(step) > std::abs(diff))
         {
@@ -425,6 +451,16 @@ void ovum::Entity_behavior_manager::Walk_forward(Entiety_data & entity_data, flo
     entity_data.energy -= sim_state->formula.Evaluate(entity_data) * delta_time;
 }
 
+float ovum::Entity_behavior_manager::Distance_to_closest_border(const glm::vec3 & pos) const
+{
+    float dist_max_x = app->world_max.x - pos.x;
+    float dist_min_x = pos.x - app->world_min.x;
+    float dist_max_z = app->world_max.z - pos.z;
+    float dist_min_z = pos.z - app->world_min.z;
+
+    return std::min({dist_max_x, dist_min_x, dist_max_z, dist_min_z});
+}
+
 void ovum::Entity_behavior_manager::Spawn_food(uint32_t food_amount)
 {
     float margin{0.6f};
@@ -478,8 +514,6 @@ void ovum::Entity_behavior_manager::React_to_event(const eruptor::event::Event& 
 
                 if(entity_a.size >= (1.30 * entity_b.size) && entity_b.ai_data.state == Ai_state::HUNTING)
                 {
-                    if(sim_settings->is_hunger_can_be_satisfied && entity_a.food_eaten >= sim_settings->food_reproduction_need) return;
-
                     entity_a.Eat(sim_settings->food_reproduction_need);
 
                     main_scene->render_objects[ entity_b.render_object_id ].is_active = false;
@@ -491,8 +525,6 @@ void ovum::Entity_behavior_manager::React_to_event(const eruptor::event::Event& 
                 }
                 else if(entity_b.size >= (1.30 * entity_a.size) && entity_a.ai_data.state == Ai_state::HUNTING && entity_b.ai_data.state == Ai_state::HUNTING)
                 {
-                    if(sim_settings->is_hunger_can_be_satisfied && entity_b.food_eaten >= sim_settings->food_reproduction_need) return;
-
                     entity_b.Eat(sim_settings->food_reproduction_need);
 
                     main_scene->render_objects[ entity_a.render_object_id ].is_active = false;

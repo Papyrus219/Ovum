@@ -39,6 +39,8 @@ protected:
 
     void Walk_forward(Entiety_data & entity_data, float delta_time);
 
+    float Distance_to_closest_border(const glm::vec3 & pos) const;
+
     Stat_chart_manager stat_chart_manager{};
 
     bool day_should_end{};

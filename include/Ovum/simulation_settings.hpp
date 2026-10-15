@@ -20,6 +20,7 @@ struct Simulation_settings
     bool is_canibalism_enabled{};
     bool is_death_from_old_age_enabled{};
     bool is_hunger_can_be_satisfied{};
+    bool is_multichild_enabled{};
 
     uint32_t start_energy{};
     uint32_t food_per_day{};
