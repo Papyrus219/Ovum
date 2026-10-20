@@ -387,7 +387,7 @@ void ovum::Editor_state::Handle_file_key_input(eruptor::event::Key key)
             {
                 app->current_scene_path = scene_path_1;
             }
-            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.c_str(), app->current_simulation_info_path.c_str());
+            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.string().c_str(), app->current_simulation_info_path.string().c_str());
             break;
         case eruptor::event::Key::KEY_2:
             if(app->window->Is_key_pressed( eruptor::event::Key::LEFT_SHIFT ))
@@ -398,7 +398,7 @@ void ovum::Editor_state::Handle_file_key_input(eruptor::event::Key key)
             {
                 app->current_scene_path = scene_path_2;
             }
-            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.c_str(), app->current_simulation_info_path.c_str());
+            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.string().c_str(), app->current_simulation_info_path.string().c_str());
             break;
         case eruptor::event::Key::KEY_3:
             if(app->window->Is_key_pressed( eruptor::event::Key::LEFT_SHIFT ))
@@ -410,7 +410,7 @@ void ovum::Editor_state::Handle_file_key_input(eruptor::event::Key key)
             {
                 app->current_scene_path = scene_path_3;
             }
-            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.c_str(), app->current_simulation_info_path.c_str());
+            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.string().c_str(), app->current_simulation_info_path.string().c_str());
             break;
         case eruptor::event::Key::KEY_4:
             if(app->window->Is_key_pressed( eruptor::event::Key::LEFT_SHIFT ))
@@ -421,7 +421,7 @@ void ovum::Editor_state::Handle_file_key_input(eruptor::event::Key key)
             {
                 app->current_scene_path = scene_path_4;
             }
-            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.c_str(), app->current_simulation_info_path.c_str());
+            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.string().c_str(), app->current_simulation_info_path.string().c_str());
             break;
         case eruptor::event::Key::KEY_5:
             if(app->window->Is_key_pressed( eruptor::event::Key::LEFT_SHIFT ))
@@ -432,7 +432,7 @@ void ovum::Editor_state::Handle_file_key_input(eruptor::event::Key key)
             {
                 app->current_scene_path = scene_path_5;
             }
-            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.c_str(), app->current_simulation_info_path.c_str());
+            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.string().c_str(), app->current_simulation_info_path.string().c_str());
             break;
         case eruptor::event::Key::KEY_6:
             if(app->window->Is_key_pressed( eruptor::event::Key::LEFT_SHIFT ))
@@ -443,7 +443,7 @@ void ovum::Editor_state::Handle_file_key_input(eruptor::event::Key key)
             {
                 app->current_scene_path = scene_path_6;
             }
-            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.c_str(), app->current_simulation_info_path.c_str());
+            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.string().c_str(), app->current_simulation_info_path.string().c_str());
             break;
         case eruptor::event::Key::KEY_7:
             if(app->window->Is_key_pressed( eruptor::event::Key::LEFT_SHIFT ))
@@ -454,7 +454,7 @@ void ovum::Editor_state::Handle_file_key_input(eruptor::event::Key key)
             {
                 app->current_scene_path = scene_path_7;
             }
-            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.c_str(), app->current_simulation_info_path.c_str());
+            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.string().c_str(), app->current_simulation_info_path.string().c_str());
             break;
         case eruptor::event::Key::KEY_8:
             if(app->window->Is_key_pressed( eruptor::event::Key::LEFT_SHIFT ))
@@ -465,7 +465,7 @@ void ovum::Editor_state::Handle_file_key_input(eruptor::event::Key key)
             {
                 app->current_scene_path = scene_path_8;
             }
-            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.c_str(), app->current_simulation_info_path.c_str());
+            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.string().c_str(), app->current_simulation_info_path.string().c_str());
             break;
         case eruptor::event::Key::KEY_9:
             if(app->window->Is_key_pressed( eruptor::event::Key::LEFT_SHIFT ))
@@ -476,7 +476,7 @@ void ovum::Editor_state::Handle_file_key_input(eruptor::event::Key key)
             {
                 app->current_scene_path = scene_path_9;
             }
-            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.c_str(), app->current_simulation_info_path.c_str());
+            std::println(std::clog, "Current scene_path: {}\nCurrent simulation_path: {}", app->current_scene_path.string().c_str(), app->current_simulation_info_path.string().c_str());
             break;
         default:
             break;

@@ -5,14 +5,8 @@ using namespace ovum;
 
 ovum::GP_communicator::GP_communicator(bool is_persist)
 {
-    if(is_persist)
-    {
-         gnuplot = popen("gnuplot -persist", "w");
-    }
-    else
-    {
-        gnuplot = popen("gnuplot", "w");
-    }
+    gnuplot = popen(is_persist ? "gnuplot -persist 2> gnuplot_err.txt"
+    : "gnuplot 2> gnuplot_err.txt", "w");
 
     if(!gnuplot)
     {
