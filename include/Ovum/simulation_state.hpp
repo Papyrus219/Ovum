@@ -23,8 +23,6 @@ public:
     virtual void Render() override;
     virtual void React_to_event(const eruptor::event::Event & event) override;
 
-    void Update_graph();
-
     virtual std::string_view Get_state_name() override {return "Simulation";}
 
     float Normilize_angle(float angle);
@@ -47,8 +45,7 @@ public:
 
     float time_acumulator{};
 
-    GP_communicator gp_comm_pop{};
-    std::chrono::high_resolution_clock::time_point last_time{};
+   std::chrono::high_resolution_clock::time_point last_time{};
 
     float simulation_speed{15};
 

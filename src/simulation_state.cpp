@@ -28,10 +28,6 @@ void ovum::Simulation_state::Init(App & app)
 {
     Assign_app( app );
 
-    gp_comm_pop.Enable_2d_bars("POPULATION", false);
-    gp_comm_pop.Set_x_axis_title("Day");
-    gp_comm_pop.Set_y_axis_title("Population");
-
     this->main_scene = &app.main_scene;
 
     auto & parser = app.resources->config_parser;
@@ -171,7 +167,6 @@ void ovum::Simulation_state::Init(App & app)
 void ovum::Simulation_state::Enter_state()
 {
     last_time = app->app_clock.now();
-    Update_graph();
 }
 
 void ovum::Simulation_state::Update()
@@ -193,41 +188,6 @@ void ovum::Simulation_state::Update()
     }
 
     last_time = app->app_clock.now();
-}
-
-void ovum::Simulation_state::Update_graph()
-{
-    population.push_back( app->main_scene.entieties.size() );
-
-    if(population.size() > 30)
-    {
-        population.erase( population.begin() );
-    }
-
-    const auto n = population.size();
-    const float day_now = static_cast<float>(day_passed);
-
-    float max_pop = 0.0f;
-    for(auto p : population)
-    {
-        max_pop = std::max(max_pop, static_cast<float>(p));
-    }
-
-    const float x_min = std::max(-0.5f, day_now - 29.5f);
-    gp_comm_pop.Set_x_axis_range(x_min, x_min + 30.0f);
-    gp_comm_pop.Set_x_tics(5.0f);
-
-    const float y_max = std::max(5.0f, max_pop * 1.1f);
-    gp_comm_pop.Set_y_axis_range(0.0f, y_max);
-    gp_comm_pop.Set_y_tics(std::max(1.0f, std::ceil(y_max / 8.0f)));
-
-    gp_comm_pop.Begin_frame();
-    for(auto i{0UZ}; i < n; i++)
-    {
-        const float day = day_now - static_cast<float>(n - 1 - i);
-        gp_comm_pop.Stage_data({day, static_cast<float>(population[i])}, 1, 0);
-    }
-    gp_comm_pop.End_frame();
 }
 
 void ovum::Simulation_state::Render()

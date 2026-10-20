@@ -15,7 +15,6 @@ void ovum::Entity_behavior_manager::Init(Simulation_state & sim_state)
     this->sim_state = &sim_state;
     this->main_scene = this->sim_state->main_scene;
     this->app = this->sim_state->app;
-    this->gp_comm_pop = &this->sim_state->gp_comm_pop;
 
     this->x_pos_distribution = &this->sim_state->x_pos_distribution;
     this->z_pos_distribution = &this->sim_state->z_pos_distribution;
@@ -141,7 +140,6 @@ void ovum::Entity_behavior_manager::New_day()
     finished_entities = 0;
     Spawn_food( sim_settings->food_per_day );
 
-    sim_state->Update_graph();
     stat_chart_manager.Update(entieties);
 }
 

@@ -54,7 +54,6 @@ protected:
     Simulation_settings * sim_settings{};
 
     Simulation_state * sim_state{};
-    ovum::GP_communicator * gp_comm_pop{};
 
     ovum::Simulation_scene * main_scene{};
     ovum::App * app{};
