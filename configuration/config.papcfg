@@ -1,5 +1,15 @@
 #Simulation preset
 
-~Custom path~ ../../configuration/custom.papcfg
+~CUSTOM path~ ../../configuration/custom.papcfg
 
-~Preset~ Custom
+#Presets with no sense evolution
+~NO SENSE NO EVO path~ ../../configuration/presets/no_sense_no_evo.papcfg
+~SENSE NO EVO path~  ../../configuration/presets/sense_no_evo.papcfg
+
+#All three evo presets
+~ALL SENSE MULTICHILD path~ ../../configuration/presets/all_sense_multichild.papcfg
+~ALL SENSE NO MULTICHILD path~ ../../configuration/presets/all_sense_no_multichild.papcfg
+
+~NOTHING path~ ../../configuration/presets/nothing.papcfg
+
+~Preset~ NOTHING

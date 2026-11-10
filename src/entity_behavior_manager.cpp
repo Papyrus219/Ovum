@@ -463,7 +463,7 @@ float ovum::Entity_behavior_manager::Distance_to_closest_border(const glm::vec3 
 
 void ovum::Entity_behavior_manager::Spawn_food(uint32_t food_amount)
 {
-    float margin{0.6f};
+    float margin{ sim_state->wall_margin };
     sim_state->x_pos_distribution.param( std::uniform_real_distribution<float>::param_type{app->world_min.x + margin, app->world_max.x - margin} );
     sim_state->z_pos_distribution.param( std::uniform_real_distribution<float>::param_type{app->world_min.z + margin, app->world_max.z - margin} );
 
