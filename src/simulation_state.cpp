@@ -35,136 +35,148 @@ void ovum::Simulation_state::Init(App & app)
     this->main_scene = &app.main_scene;
 
     auto & parser = app.resources->config_parser;
-    auto config_data = parser.Parse_config_file("../../configuration/simulation.papcfg");
 
-    uint32_t start_speed{}, start_size{}, start_sense{};
-
-    if(config_data)
+    auto config_preset = parser.Parse_config_file("../../configuration/config.papcfg");
+    if(config_preset)
     {
-        auto is_speed_evo = Get_value_from_config_field(*config_data, "Speed evo");
-        if(is_speed_evo == "ON")
+        auto preset_name = Get_value_from_config_field(*config_preset, "Preset");
+
+        auto config_data = parser.Parse_config_file( Get_value_from_config_field(*config_preset, std::string{preset_name} + " path") );
+
+
+        uint32_t start_speed{}, start_size{}, start_sense{};
+
+        if(config_data)
         {
-            sim_settings.is_speed_evo_enabled = true;
+            auto is_speed_evo = Get_value_from_config_field(*config_data, "Speed evo");
+            if(is_speed_evo == "ON")
+            {
+                sim_settings.is_speed_evo_enabled = true;
 
-            float min{}, max{};
+                float min{}, max{};
 
-            auto speed_evo_min = Get_value_from_config_field(*config_data, "Speed evo range min");
-            parser.Convert_string_to_number(speed_evo_min, min, "Speed evo range min");
+                auto speed_evo_min = Get_value_from_config_field(*config_data, "Speed evo range min");
+                parser.Convert_string_to_number(speed_evo_min, min, "Speed evo range min");
 
-            auto speed_evo_max = Get_value_from_config_field(*config_data, "Speed evo range max");
-            parser.Convert_string_to_number(speed_evo_max, max, "Speed evo range max");
+                auto speed_evo_max = Get_value_from_config_field(*config_data, "Speed evo range max");
+                parser.Convert_string_to_number(speed_evo_max, max, "Speed evo range max");
 
-            sim_settings.speed_evo_distributor.param( std::uniform_real_distribution<float>::param_type{ min, max } );
+                sim_settings.speed_evo_distributor.param( std::uniform_real_distribution<float>::param_type{ min, max } );
+            }
+
+            auto is_size_evo = Get_value_from_config_field(*config_data, "Size evo");
+            if(is_size_evo == "ON")
+            {
+                sim_settings.is_size_evo_enabled = true;
+
+                float min{}, max{};
+
+                auto size_evo_min = Get_value_from_config_field(*config_data, "Size evo range min");
+                parser.Convert_string_to_number(size_evo_min, min, "Size evo range min");
+
+                auto size_evo_max = Get_value_from_config_field(*config_data, "Size evo range max");
+                parser.Convert_string_to_number(size_evo_max, max, "Size evo range max");
+
+                sim_settings.size_evo_distributor.param( std::uniform_real_distribution<float>::param_type{ min, max } );
+            }
+
+            auto is_sense_evo = Get_value_from_config_field(*config_data, "Sense evo");
+            if(is_sense_evo == "ON")
+            {
+                sim_settings.is_sense_evo_enabled = true;
+
+                float min{}, max{};
+
+                auto sense_evo_min = Get_value_from_config_field(*config_data, "Sense evo range min");
+                parser.Convert_string_to_number(sense_evo_min, min, "Sense evo range min");
+
+                auto sense_evo_max = Get_value_from_config_field(*config_data, "Sense evo range max");
+                parser.Convert_string_to_number(sense_evo_max, max, "Sense evo range max");
+
+                sim_settings.sense_evo_distributor.param( std::uniform_real_distribution<float>::param_type{ min, max } );
+            }
+
+            auto is_sense_used = Get_value_from_config_field(*config_data, "Use sense with movement");
+            if(is_sense_used == "ON")
+            {
+                sim_settings.is_sense_used = true;
+            }
+
+            auto is_canibalism = Get_value_from_config_field(*config_data, "Canibalism");
+            if(is_canibalism == "ON")
+            {
+                sim_settings.is_canibalism_enabled = true;
+            }
+
+            auto is_hunger_can_be_sat = Get_value_from_config_field(*config_data, "Hunger can be satisfied");
+            if(is_hunger_can_be_sat == "ON")
+            {
+                sim_settings.is_hunger_can_be_satisfied = true;
+            }
+
+            auto is_dead_from_old_age_enabled = Get_value_from_config_field(*config_data, "Dead from old age");
+            if(is_dead_from_old_age_enabled == "ON")
+            {
+                sim_settings.is_death_from_old_age_enabled = true;
+
+                auto live_duration = Get_value_from_config_field(*config_data, "Live duration");
+                parser.Convert_string_to_number(live_duration, sim_settings.live_duration, "Live duration");
+            }
+
+            auto is_multichild_enabled = Get_value_from_config_field(*config_data, "Multichild");
+            if(is_multichild_enabled == "ON")
+            {
+                sim_settings.is_multichild_enabled = true;
+            }
+
+            registry = Make_registry();
+
+            auto formula_str = Get_value_from_config_field(*config_data, "Energy formula");
+            formula = Formula::Compile(formula_str, registry);
+
+            auto start_energy = Get_value_from_config_field(*config_data, "Start energy");
+            parser.Convert_string_to_number(start_energy, sim_settings.start_energy, "Start energy");
+
+            auto food_per_day = Get_value_from_config_field(*config_data, "Food per day");
+            parser.Convert_string_to_number(food_per_day, sim_settings.food_per_day, "Food per day");
+
+            auto survive_need = Get_value_from_config_field(*config_data, "Survive need");
+            parser.Convert_string_to_number(survive_need, sim_settings.food_survive_need, "Survive need");
+
+            auto reproduction_need = Get_value_from_config_field(*config_data, "Reproduction need");
+            parser.Convert_string_to_number(reproduction_need, sim_settings.food_reproduction_need, "Reproduction need");
+
+            auto start_speed_str = Get_value_from_config_field(*config_data, "Start speed");
+            parser.Convert_string_to_number(start_speed_str, start_speed, "Start speed");
+
+            auto start_size_str = Get_value_from_config_field(*config_data, "Start speed");
+            parser.Convert_string_to_number(start_size_str, start_size, "Start size");
+
+            auto start_sense_str = Get_value_from_config_field(*config_data, "Start sense");
+            parser.Convert_string_to_number(start_sense_str, start_sense, "Start sense");
+        }
+        else
+        {
+            std::println(std::cerr << "UNKNOWN PRESET!");
         }
 
-        auto is_size_evo = Get_value_from_config_field(*config_data, "Size evo");
-        if(is_size_evo == "ON")
+        behavior_manager.Init( *this );
+
+        for(auto & entity : main_scene->entieties)
         {
-            sim_settings.is_size_evo_enabled = true;
+            entity.Reset();
 
-            float min{}, max{};
+            glm::vec3 forward = main_scene->render_objects[ entity.render_object_id ].Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f};
+            float yaw = std::atan2(-forward.z, forward.x);
 
-            auto size_evo_min = Get_value_from_config_field(*config_data, "Size evo range min");
-            parser.Convert_string_to_number(size_evo_min, min, "Size evo range min");
+            entity.speed = start_speed;
+            entity.size = start_size;
+            entity.sense = start_sense;
 
-            auto size_evo_max = Get_value_from_config_field(*config_data, "Size evo range max");
-            parser.Convert_string_to_number(size_evo_max, max, "Size evo range max");
-
-            sim_settings.size_evo_distributor.param( std::uniform_real_distribution<float>::param_type{ min, max } );
+            entity.ai_data.curr_y_rot = yaw;
+            entity.ai_data.desire_y_rot = yaw;
+            entity.ai_data.is_desire_rot = true;
         }
-
-        auto is_sense_evo = Get_value_from_config_field(*config_data, "Sense evo");
-        if(is_sense_evo == "ON")
-        {
-            sim_settings.is_sense_evo_enabled = true;
-
-            float min{}, max{};
-
-            auto sense_evo_min = Get_value_from_config_field(*config_data, "Sense evo range min");
-            parser.Convert_string_to_number(sense_evo_min, min, "Sense evo range min");
-
-            auto sense_evo_max = Get_value_from_config_field(*config_data, "Sense evo range max");
-            parser.Convert_string_to_number(sense_evo_max, max, "Sense evo range max");
-
-            sim_settings.sense_evo_distributor.param( std::uniform_real_distribution<float>::param_type{ min, max } );
-        }
-
-        auto is_sense_used = Get_value_from_config_field(*config_data, "Use sense with movement");
-        if(is_sense_used == "ON")
-        {
-            sim_settings.is_sense_used = true;
-        }
-
-        auto is_canibalism = Get_value_from_config_field(*config_data, "Canibalism");
-        if(is_canibalism == "ON")
-        {
-            sim_settings.is_canibalism_enabled = true;
-        }
-
-        auto is_hunger_can_be_sat = Get_value_from_config_field(*config_data, "Hunger can be satisfied");
-        if(is_hunger_can_be_sat == "ON")
-        {
-            sim_settings.is_hunger_can_be_satisfied = true;
-        }
-
-        auto is_dead_from_old_age_enabled = Get_value_from_config_field(*config_data, "Dead from old age");
-        if(is_dead_from_old_age_enabled == "ON")
-        {
-            sim_settings.is_death_from_old_age_enabled = true;
-
-            auto live_duration = Get_value_from_config_field(*config_data, "Live duration");
-            parser.Convert_string_to_number(live_duration, sim_settings.live_duration, "Live duration");
-        }
-
-        auto is_multichild_enabled = Get_value_from_config_field(*config_data, "Multichild");
-        if(is_multichild_enabled == "ON")
-        {
-            sim_settings.is_multichild_enabled = true;
-        }
-
-        registry = Make_registry();
-
-        auto formula_str = Get_value_from_config_field(*config_data, "Energy formula");
-        formula = Formula::Compile(formula_str, registry);
-
-        auto start_energy = Get_value_from_config_field(*config_data, "Start energy");
-        parser.Convert_string_to_number(start_energy, sim_settings.start_energy, "Start energy");
-
-        auto food_per_day = Get_value_from_config_field(*config_data, "Food per day");
-        parser.Convert_string_to_number(food_per_day, sim_settings.food_per_day, "Food per day");
-
-        auto survive_need = Get_value_from_config_field(*config_data, "Survive need");
-        parser.Convert_string_to_number(survive_need, sim_settings.food_survive_need, "Survive need");
-
-        auto reproduction_need = Get_value_from_config_field(*config_data, "Reproduction need");
-        parser.Convert_string_to_number(reproduction_need, sim_settings.food_reproduction_need, "Reproduction need");
-
-        auto start_speed_str = Get_value_from_config_field(*config_data, "Start speed");
-        parser.Convert_string_to_number(start_speed_str, start_speed, "Start speed");
-
-        auto start_size_str = Get_value_from_config_field(*config_data, "Start speed");
-        parser.Convert_string_to_number(start_size_str, start_size, "Start size");
-
-        auto start_sense_str = Get_value_from_config_field(*config_data, "Start sense");
-        parser.Convert_string_to_number(start_sense_str, start_sense, "Start sense");
-    }
-
-    behavior_manager.Init( *this );
-
-    for(auto & entity : main_scene->entieties)
-    {
-        entity.Reset();
-
-        glm::vec3 forward = main_scene->render_objects[ entity.render_object_id ].Get_rotation() * glm::vec3{1.0f, 0.0f, 0.0f};
-        float yaw = std::atan2(-forward.z, forward.x);
-
-        entity.speed = start_speed;
-        entity.size = start_size;
-        entity.sense = start_sense;
-
-        entity.ai_data.curr_y_rot = yaw;
-        entity.ai_data.desire_y_rot = yaw;
-        entity.ai_data.is_desire_rot = true;
     }
 }
 
