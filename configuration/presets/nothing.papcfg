@@ -8,7 +8,7 @@
 ~Use sense with movement~ ON
 ~Canibalism~ OFF
 ~Hunger can be satisfied~ ON
-~Dead from old age~ ON
+~Dead from old age~ OFF
 
 #When multichild is ON reproduction need is max food per day
 ~Multichild~ OFF
