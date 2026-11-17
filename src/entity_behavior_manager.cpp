@@ -143,9 +143,20 @@ void ovum::Entity_behavior_manager::New_day()
 
     sim_state->Update_graph();
     stat_chart_manager.Update(entieties);
+
+    auto & renders_objects = main_scene->render_objects;
+    for(auto & entity : entieties)
+    {
+        auto & color = renders_objects[ entity.render_object_id ].color;
+
+        color.red = 51 + ( (204 / 12) * entity.speed );
+        color.green = 51 + ( (204 / 12) * entity.size );
+        color.blue = 51 + ( (204 / 12) * entity.sense );
+        color.alpha = 255;
+    }
 }
 
-void ovum::Entity_behavior_manager::State_change_check(Entiety_data& entity_data)
+void ovum::Entity_behavior_manager::State_change_check(Entiety_data & entity_data)
 {
     auto & render_object = main_scene->render_objects[ entity_data.render_object_id ];
     auto pos = render_object.Get_position();

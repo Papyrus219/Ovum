@@ -12,14 +12,14 @@
 #When multichild is ON reproduction need is max food per day
 ~Multichild~ OFF
 
-~Speed evo range min~ -0.3
-~Speed evo range max~  0.3
+~Speed evo range min~ -0.1
+~Speed evo range max~  0.1
 
-~Size evo range min~ -0.29
-~Size evo range max~  0.29
+~Size evo range min~ -0.1
+~Size evo range max~  0.1
 
-~Sense evo range min~ -0.3
-~Sense evo range max~  0.3
+~Sense evo range min~ -0.1
+~Sense evo range max~  0.1
 
 ~Energy formula~ ((size * size * size) * (speed * speed)) + sense
 
@@ -33,6 +33,6 @@
 
 ~Start speed~ 1
 ~Start size~ 1
-~Start sense~ 8
+~Start sense~ 2
 
 
